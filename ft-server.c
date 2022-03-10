@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include <WinSock2.h>
-#include <io.h>
 
 #include "common.h"
 
@@ -16,6 +14,12 @@ int32_t get_file_size(const char * filename)
             return _filelength(fileno(fopen(filename, "rb")));
         else
             return 0;
+    #elif linux
+    struct stat st;
+    if(stat(filename, &st) == 0)
+        return st.st_size;
+    else
+        return 0;
     #endif
 }
 
@@ -26,9 +30,11 @@ int main(int argc, char ** argv)
         printf("Usage: %s <port>\n", argv[0]);
         return -1;
     }
+    #ifdef WIN32
     WSADATA wsaData;
     if(WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
         ERROR_HANDLING("WSAStartup");
+    #endif
     SOCKET hServerSocket = socket(AF_INET, SOCK_STREAM, 0), hClientSocket;
     if(hServerSocket == INVALID_SOCKET)
         ERROR_HANDLING("socket");

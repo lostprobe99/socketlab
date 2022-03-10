@@ -8,14 +8,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <WinSock2.h>
 #include "common.h"
 
 int main(int argc, char ** argv)
 {
+    #ifdef WIN32
     WSADATA wsaData;
     if(WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
        ERROR_HANDLING("WSAStartup");
+    #endif
     int snd_buf_size = 0, rcv_buf_size = 0;
     int len = sizeof(snd_buf_size), state;
     SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);

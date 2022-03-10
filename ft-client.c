@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <winsock2.h>
 #include <stdint.h>
 
 #include "common.h"
@@ -23,10 +22,12 @@ int main(int argc, char **argv)
         #endif
     }
     // 创建 socket 连接
+    #ifdef WIN32
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
         ERROR_HANDLING("WSAStartup");
-    SOCKET hSocket = socket(AF_INET, SOCK_STREAM, 0);
+    #endif
+    int hSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (hSocket == INVALID_SOCKET)
         ERROR_HANDLING("socket");
 
