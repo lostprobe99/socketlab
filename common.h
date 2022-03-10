@@ -10,10 +10,13 @@
 #define COMMON_H
 
 #ifdef WIN32
+
 #include <winsock2.h>
 #include <io.h>
 #define sleep _sleep
+
 #elif linux
+
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <unistd.h>
