@@ -9,18 +9,16 @@
 
 int32_t get_file_size(const char * filename)
 {
-    #if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
-        if(_access(filename, 04) == 0)  // 可读
-            return _filelength(fileno(fopen(filename, "rb")));
-        else
-            return 0;
-    #elif linux
+#if defined(_MSC_VER) || defined(_MSC_EXTENSIONS)
+    if(_access(filename, 04) == 0)  // 可读
+        return _filelength(fileno(fopen(filename, "rb")));
+#elif linux
     struct stat st;
     if(stat(filename, &st) == 0)
         return st.st_size;
+#endif
     else
         return 0;
-    #endif
 }
 
 int main(int argc, char ** argv)

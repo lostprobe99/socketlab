@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(netlab)
+project(socketlab)
 
 if(MSVC)
     # 为 msvc 指定源文件为 utf8

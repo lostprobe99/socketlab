@@ -24,18 +24,26 @@
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
-#define SOCKADDR_IN struct sockaddr_in
-#define SOCKADDR struct sockaddr
-#define SOCKET int
+typedef struct sockaddr_in SOCKADDR_IN;
+typedef struct sockaddr SOCKADDR;
+typedef int SOCKET;
 #endif
 
 #define ERROR_HANDLING(str)                         \
     do                                              \
     {                                               \
-        char buf[256], *fmt = "%s:%d: %s\n";        \
+        char buf[256], *fmt = "%s:%d: %s";        \
         sprintf(buf, fmt, __FILE__, __LINE__, str); \
         perror(buf);                                \
         exit(1);                                    \
+    } while (0)
+
+#define ERROR_P(str)                         \
+    do                                              \
+    {                                               \
+        char buf[256], *fmt = "%s:%d: %s";        \
+        sprintf(buf, fmt, __FILE__, __LINE__, str); \
+        perror(buf);                                \
     } while (0)
 
 #endif // COMMON_H
