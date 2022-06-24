@@ -1,3 +1,4 @@
+#if 0
 #define __SSP_STRONG__ 3
 #define __DBL_MIN_EXP__ (-1021)
 #define __FLT32X_MAX_EXP__ 1024
@@ -346,3 +347,5 @@
 #define __UINT_FAST8_TYPE__ unsigned char
 #define __ATOMIC_ACQ_REL 4
 #define __ATOMIC_RELEASE 3
+
+#endif

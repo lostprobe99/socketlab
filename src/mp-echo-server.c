@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <sys/wait.h>
-
 #include "common.h"
 
 #define BUF_SIZE 1024
@@ -25,6 +23,7 @@ int main(int argc, char **argv)
         printf("Usage: %s <port>\n", argv[0]);
         exit(1);
     }
+    #ifdef linux
     signal(SIGCHLD, childproc);
 
     int serv_sock = socket(AF_INET, SOCK_STREAM, 0), clnt_sock;
@@ -71,6 +70,7 @@ int main(int argc, char **argv)
             ERROR_HANDLING("fork");
     }
     close(serv_sock);
+    #endif
 
     return 0;
 }

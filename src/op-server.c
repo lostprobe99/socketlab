@@ -1,13 +1,17 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
 
 #include "common.h"
 
 #define BUF_SIZE 1024
+
+typedef enum _color {
+    RED = 1,
+    GREEN = 2,
+    BLUE = 4
+}Color;
+static const Color color = RED | GREEN;
 
 static int add(int n, int *nums)
 {
