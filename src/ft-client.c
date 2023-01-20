@@ -21,25 +21,16 @@ int main(int argc, char **argv)
         return -1;
         #endif
     }
+    if(!strcmp(ip, "localhost"))
+        ip = "127.0.0.1";
     // 创建 socket 连接
-    #if defined(_WIN32) || defined(_WIN64)
-    WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-        ERROR_HANDLING("WSAStartup");
-    #endif
-    int hSocket = socket(AF_INET, SOCK_STREAM, 0);
+    int hSocket = make_socket(AF_INET, SOCK_STREAM, 0);
     if (hSocket == INVALID_SOCKET)
         ERROR_HANDLING("socket");
 
-    SOCKADDR_IN servAddr;
-    memset(&servAddr, 0, sizeof(servAddr));
-    servAddr.sin_family = AF_INET;
-    servAddr.sin_addr.s_addr = inet_addr(ip);  // ip == argv[1]
-    if (!strcmp(ip, "localhost"))
-        servAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    servAddr.sin_port = htons(atoi(port));   // port == argv[2]
+    sockaddr_in servAddr = make_sockaddr(AF_INET, ip, atoi(port));
 
-    if (connect(hSocket, (struct sockaddr *)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)
+    if (connect(hSocket, (sockaddr *)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)
         ERROR_HANDLING("connect");
     else
         printf("Connected\n");
@@ -66,12 +57,12 @@ int main(int argc, char **argv)
             while(t < file_size)
             {   // 接收数据并写文件
                 n = recv(hSocket, buf, BUF_SIZE, 0);
-                printf("received %d bytes\n", (t += n));
+                printf("received %d bytes\r", (t += n));
                 fwrite(buf, 1, n, fp);
                 memset(buf, 0, BUF_SIZE);
             }
             fclose(fp);
-            printf("end receive\n");
+            printf("\nend receive\n");
         }
         else
             printf("File Not Found\n");

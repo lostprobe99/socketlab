@@ -17,6 +17,9 @@
 #define sleep _sleep
 
 typedef int socklen_t;
+typedef SOCKET socket_t;
+typedef SOCKADDR_IN sockaddr_in;
+typedef SOCKADDR sockaddr;
 
 #elif linux
 
@@ -28,10 +31,14 @@ typedef int socklen_t;
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
-typedef struct sockaddr_in SOCKADDR_IN;
-typedef struct sockaddr SOCKADDR;
+typedef struct sockaddr_in sockaddr_in;
+typedef struct sockaddr sockaddr;
 typedef int SOCKET;
+typedef int socket_t;
 #endif
+
+socket_t make_socket(int af, int type, int protocol);
+sockaddr_in make_sockaddr(int af, const char* addr, unsigned short port);
 
 #define ERROR_HANDLING(str)                         \
     do                                              \

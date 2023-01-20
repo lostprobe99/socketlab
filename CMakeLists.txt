@@ -7,22 +7,26 @@ if(MSVC)
     add_compile_options("$<$<C_COMPILER_ID:MSVC>:/source-charset:utf-8>")
 endif()
 
-set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
-set(INC ./inc)
+set(INCLUDE ./include)
 
-include_directories(${INC})
+include_directories(${INCLUDE})
+
+add_library(common_tool STATIC ${INCLUDE}/common.c)
+target_link_libraries(common_tool wsock32 ws2_32)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-# file(GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR} *.cpp *.c)
 aux_source_directory(src sources)
+aux_source_directory(test TEST)
+list(APPEND sources ${TEST})
 
-message(STATUS "Found ${sources} source files\n")
+# message(STATUS "Found ${sources} source files\n")
 
 foreach(main IN LISTS sources)
+    message(STATUS "Found source file ${main}")
     get_filename_component(mainname ${main} NAME_WE)
     add_executable(${mainname} ${main})
     if(WIN32)
@@ -30,15 +34,5 @@ foreach(main IN LISTS sources)
         target_link_libraries(${mainname} wsock32 ws2_32)
     endif()
     target_link_libraries(${mainname} ${CONAN_LIBS})
-endforeach()
-
-enable_testing()
-add_subdirectory(test)
-aux_source_directory(test tests)
-
-foreach(main IN LISTS tests)
-    get_filename_component(mainname ${main} NAME_WE)
-    add_executable(${mainname} ${main})
-    add_test(NAME ${mainname} COMMAND ${mainname})  # COMMAND 要和 executable 的名字对应
-    target_link_libraries(${mainname} ${CONAN_LIBS})
+    target_link_libraries(${mainname} common_tool)
 endforeach()

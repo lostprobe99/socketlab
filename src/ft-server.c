@@ -28,20 +28,11 @@ int main(int argc, char ** argv)
         printf("Usage: %s <port>\n", argv[0]);
         return -1;
     }
-    #if defined(_WIN32) || defined(_WIN64)
-    WSADATA wsaData;
-    if(WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-        ERROR_HANDLING("WSAStartup");
-    #endif
-    SOCKET hServerSocket = socket(AF_INET, SOCK_STREAM, 0), hClientSocket;
+    socket_t hServerSocket = make_socket(AF_INET, SOCK_STREAM, 0), hClientSocket;
     if(hServerSocket == INVALID_SOCKET)
         ERROR_HANDLING("socket");
-    SOCKADDR_IN servAddr, clntAddr;
-    memset(&servAddr, 0, sizeof(servAddr));
-    servAddr.sin_family = AF_INET;
-    servAddr.sin_port = htons(atoi(argv[1]));
-    servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    if(bind(hServerSocket, (SOCKADDR *)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)
+    sockaddr_in servAddr = make_sockaddr(AF_INET, "127.0.0.1", atoi(argv[1])), clntAddr;
+    if(bind(hServerSocket, (sockaddr *)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)
         ERROR_HANDLING("bind");
     if(listen(hServerSocket, 5) == SOCKET_ERROR)
         ERROR_HANDLING("listen");
