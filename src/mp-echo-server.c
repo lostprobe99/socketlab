@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 #include "common.h"
 
@@ -23,19 +24,19 @@ int main(int argc, char **argv)
         printf("Usage: %s <port>\n", argv[0]);
         exit(1);
     }
-    #ifdef linux
+    #ifdef __linux
     signal(SIGCHLD, childproc);
 
     int serv_sock = socket(AF_INET, SOCK_STREAM, 0), clnt_sock;
     if (serv_sock == -1)
         ERROR_HANDLING("socket");
-    SOCKADDR_IN serv_addr, clnt_addr;
+    sockaddr_in serv_addr, clnt_addr;
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     serv_addr.sin_port = htons(atoi(argv[1]));
 
-    if (bind(serv_sock, (SOCKADDR *)&serv_addr, sizeof(serv_addr)) == -1)
+    if (bind(serv_sock, (sockaddr *)&serv_addr, sizeof(serv_addr)) == -1)
         ERROR_HANDLING("bind");
     if (listen(serv_sock, 5) == -1)
         ERROR_HANDLING("listen");
@@ -45,7 +46,7 @@ int main(int argc, char **argv)
     int str_len, addr_sz;
     while (1)
     {
-        clnt_sock = accept(serv_sock, (SOCKADDR *)&clnt_addr, &addr_sz);
+        clnt_sock = accept(serv_sock, (sockaddr *)&clnt_addr, &addr_sz);
         if (clnt_sock == -1)
         {
             ERROR_P("accept");

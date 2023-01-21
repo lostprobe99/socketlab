@@ -19,7 +19,7 @@ int main(int argc, char ** argv)
     #endif
     int snd_buf_size = 0, rcv_buf_size = 0;
     int len = sizeof(snd_buf_size), state;
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+    socket_t sock = socket(AF_INET, SOCK_STREAM, 0);
     // 获取发送缓冲区大小
     state = getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (void*)&snd_buf_size, &len);
     if(state)

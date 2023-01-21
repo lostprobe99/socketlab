@@ -39,7 +39,7 @@ int main(int argc, char ** argv)
     
     while(1)
     {
-        hClientSocket = accept(hServerSocket, (SOCKADDR *)&clntAddr, NULL);
+        hClientSocket = accept(hServerSocket, (sockaddr *)&clntAddr, NULL);
         // 接收文件名，并判断文件是否可读
         char msg[BUF_SIZE], buf[BUF_SIZE];
         memset(msg, 0, BUF_SIZE);

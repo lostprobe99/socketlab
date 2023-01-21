@@ -21,7 +21,7 @@ typedef SOCKET socket_t;
 typedef SOCKADDR_IN sockaddr_in;
 typedef SOCKADDR sockaddr;
 
-#elif linux
+#elif __linux
 
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -33,7 +33,6 @@ typedef SOCKADDR sockaddr;
 #define SOCKET_ERROR -1
 typedef struct sockaddr_in sockaddr_in;
 typedef struct sockaddr sockaddr;
-typedef int SOCKET;
 typedef int socket_t;
 #endif
 

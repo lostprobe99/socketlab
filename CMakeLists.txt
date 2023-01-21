@@ -14,7 +14,9 @@ set(INCLUDE ./include)
 include_directories(${INCLUDE})
 
 add_library(common_tool STATIC ${INCLUDE}/common.c)
-target_link_libraries(common_tool wsock32 ws2_32)
+if(WIN32)
+    target_link_libraries(common_tool wsock32 ws2_32)
+endif()
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
