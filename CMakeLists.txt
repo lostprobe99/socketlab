@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(socketlab)
+project(socketlab LANGUAGES C CXX)
 
 if(MSVC)
     # 为 msvc 指定源文件为 utf8
@@ -15,8 +15,11 @@ include_directories(${INCLUDE})
 
 add_library(common_tool STATIC ${INCLUDE}/common.c)
 if(WIN32)
-    target_link_libraries(common_tool wsock32 ws2_32)
+    target_link_libraries(common_tool PRIVATE wsock32 ws2_32)
 endif()
+
+add_library(minish STATIC ${INCLUDE}/minish.c)
+target_link_libraries(minish PRIVATE readline)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
@@ -24,6 +27,8 @@ conan_basic_setup()
 aux_source_directory(src sources)
 aux_source_directory(test TEST)
 list(APPEND sources ${TEST})
+aux_source_directory(src/ft FT)
+list(APPEND sources ${FT})
 
 # message(STATUS "Found ${sources} source files\n")
 
@@ -37,4 +42,6 @@ foreach(main IN LISTS sources)
     endif()
     target_link_libraries(${mainname} ${CONAN_LIBS})
     target_link_libraries(${mainname} common_tool)
+    target_link_libraries(${mainname} readline)
+    target_link_libraries(${mainname} minish)
 endforeach()

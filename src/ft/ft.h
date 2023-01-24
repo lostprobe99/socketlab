@@ -1,0 +1,24 @@
+#ifndef FT_H
+#define FT_H
+
+enum ft_request_type {
+    LS = 1,
+    PWD,
+    CD,
+    GET,
+    PUT,
+    EXIT,
+    END =127 
+};
+
+char* ft_request_str[] = {
+    "",
+    "LS",
+    "PWD",
+    "CD",
+    "GET",
+    "PUT",
+    "EXIT"
+};
+
+#endif // FT_H

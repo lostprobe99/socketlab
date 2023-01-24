@@ -12,15 +12,9 @@
 
 int main(int argc, char ** argv)
 {
-    #if defined(_WIN32) || defined(_WIN64)
-    WSADATA wsaData;
-    if(WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-       ERROR_HANDLING("WSAStartup");
-    #endif
-    
     // 创建 socket
-    int tcp_sock = socket(AF_INET, SOCK_STREAM, 0);
-    int udp_sock = socket(AF_INET, SOCK_DGRAM, 0);
+    int tcp_sock = make_socket(AF_INET, SOCK_STREAM, 0);
+    int udp_sock = make_socket(AF_INET, SOCK_DGRAM, 0);
     int sock_type, state;
     int optlen = sizeof(sock_type);
     printf("SOCK_STREAM: %d\n", SOCK_STREAM);
