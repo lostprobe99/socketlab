@@ -64,6 +64,7 @@ int response_ls(socket_t fd, char * args)
     return 0;
 }
 
+// OK
 int response_pwd(socket_t fd, char * args)
 {
     char * s;
@@ -77,6 +78,59 @@ int response_pwd(socket_t fd, char * args)
 }
 
 int response_exit(socket_t fd, char * args)
+{
+    // 如何处理？
+    // 关闭线程？
+
+    close(fd);
+    exit(0);
+}
+
+// OK
+int response_cd(socket_t fd, char * args)
+{
+    char * path, *s;
+    int n = 0;
+    if(*args == 0)
+        path = ".";
+    else
+        path = strtok(args, " ");
+
+    if(chdir(path) == -1)
+    {
+        memset(buf, 0, BUF_SIZE);
+        n = sprintf(buf, "cd `%s` failed: %s\n", path, strerror(errno));
+        send(fd, buf, n, 0);
+        response_pwd(fd, path);
+    }
+    else
+        response_pwd(fd, path);
+
+    return 0;
+}
+
+int response_get(socket_t fd, char * args)
+{
+    // TODO: 解析文件路径中的文件名
+    memset(msg, 0, BUF_SIZE);
+    // TODO: 错误处理
+    char * filename = strtok(args, " ");
+    int n = 0;
+    long fsize = get_file_size(filename);
+    n = sprintf(msg, "%ld", fsize); // buf 和 filename 指向同一个地址
+    // 在文件名后添加分隔符
+    msg[n + 1] = BR;     // 不加客户端卡 97.23%，对于 crc16
+    send(fd, msg, n + 1, 0);
+    printf("send %s\n", filename);
+    FILE* fp = fopen(filename, "rb");
+    while((n = fread(msg, 1, BUF_SIZE, fp)) != 0)
+        send(fd, msg, n, 0);
+    // buf[0] = END;        // 文件中会有等于 END 的字节吗？
+    // send(fd, buf, 1, 0);
+    fclose(fp);
+}
+
+int response_put(socket_t fd, char * args)
 {
 
 }
@@ -116,7 +170,6 @@ int main(int argc, char ** argv)
     while(1)
     {
         // 接收文件名，并判断文件是否可读
-        memset(msg, 0, BUF_SIZE);
         memset(buf, 0, BUF_SIZE);
         // 接收请求，解析请求类型
         n = recv(hClientSocket, buf, BUF_SIZE, 0);
@@ -126,18 +179,22 @@ int main(int argc, char ** argv)
         switch(buf[0])
         {
             case LS:
-                response_ls(hClientSocket, buf + 1);
+                response_ls(hClientSocket, buf + 1);    // OK
                 break;
             case PWD:
-                response_pwd(hClientSocket, buf + 1);
+                response_pwd(hClientSocket, buf + 1);   // OK
                 break;
             case CD:
+                response_cd(hClientSocket, buf + 1);    // OK
                 break;
             case GET:
+                response_get(hClientSocket, buf + 1);
                 break;
             case PUT:
+                response_put(hClientSocket, buf + 1);
                 break;
             case EXIT:
+                response_exit(hClientSocket, buf + 1);  // ？？我很疑惑
                 break;
             default:
                 break;

@@ -5,6 +5,7 @@
 #include <errno.h>
 
 #include <dirent.h>
+#include <signal.h>
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -40,7 +41,6 @@
 
 socket_t server_fd = 0;
 char buf[BUF_SIZE];
-long fsize;
 
 int cmd_open(char * args);
 int cmd_ls(char * args);
@@ -74,12 +74,15 @@ int recv_file(int fd, const char * filename, const long filesize)
         n = recv(fd, buf, BUF_SIZE, 0);
         t += n;
         printf("%s: %ld/%ld %.2lf%%\r", filename, t, filesize, 1.0 * t / filesize * 100);
+        // fflush(stdout);  // 加了会有一部分接收不到？
         fwrite(buf, 1, n, fp);  // 写 n 次 1 字节
     }
     fclose(fp);
     printf("\nrecv %s done\n", filename);
 }
 
+// OK
+// 打开一个连接
 int cmd_open(char * args)
 {
     // TODO: 解析域名
@@ -99,6 +102,7 @@ int cmd_open(char * args)
     return 0;
 }
 
+// OK
 // 查看远程主机的文件
 int cmd_ls(char * args)
 {
@@ -110,31 +114,16 @@ int cmd_ls(char * args)
     send(server_fd, buf, BUF_SIZE, 0);
     memset(buf, 0, BUF_SIZE);
     PRINT_RESPONSE_BODY;
-    // char * s, *se;
-    // int n;
-    // do
-    // {
-    //     if ((n = recv(server_fd, buf, BUF_SIZE, 0)) == -1)
-    //         FATAL_EXIT("recv() error");
-    //     s = buf;
-    //     se = buf + n;
-    //     while(s < se)
-    //     {
-    //         if(*s == END)   // 数据边界
-    //         {
-    //             putchar('\n');
-    //             return 0;   // 服务器发送的数据中已添加换行符
-    //         }
-    //         putchar(*s);
-    //         s++;
-    //     }
-    // } while (1);
+    
     return 0;
 }
 
 // 下载文件
 int cmd_get(char * args)
 {
+    long fsize = 0;
+    int n = 0;
+    char * s;
     memset(buf, 0, BUF_SIZE);
     // TODO: 连接检测
     if(args != NULL)
@@ -145,8 +134,13 @@ int cmd_get(char * args)
         send(server_fd, buf, BUF_SIZE, 0);
         memset(buf, 0, BUF_SIZE);
         // 接收文件大小
-        recv(server_fd, &fsize, sizeof(fsize), 0);
-        printf("file size: %ld\n", fsize);
+        n = recv(server_fd, buf, BUF_SIZE, 0);
+        // buf[n + 1] = 0;
+        // s = buf;
+        // while(*s++ != BR);
+        // *s = 0;
+        fsize = atoi(buf);
+        printf("file size: %ld bytes\n", fsize);
         recv_file(server_fd, args, fsize);
         return 0;
     }
@@ -157,11 +151,24 @@ int cmd_get(char * args)
 
 int cmd_exit(char * args)
 {
+    memset(buf, 0, BUF_SIZE);
+    buf[0] = EXIT;
+    send(server_fd, buf, BUF_SIZE, 0);
+    NORM("`EXIT` send");
     // 清理已分配的资源
     close(server_fd);
     exit(0);
 }
 
+void sig_exit(int sig)
+{
+    if(sig == SIGINT)
+    {
+        cmd_exit(NULL);
+    }
+}
+
+// OK
 int cmd_help(char * args)
 {
     char * arg = strtok(NULL, " ");
@@ -184,6 +191,8 @@ int cmd_help(char * args)
     }
 }
 
+// OK
+// 打印当前所在目录
 int cmd_pwd(char * args)
 {
     memset(buf, 0, BUF_SIZE);
@@ -191,54 +200,20 @@ int cmd_pwd(char * args)
     send(server_fd, buf, 1, 0);
     memset(buf, 0, BUF_SIZE);
     PRINT_RESPONSE_BODY;
-    // char * s, *se;
-    // int n;
-    // do
-    // {
-    //     if ((n = recv(server_fd, buf, BUF_SIZE, 0)) == -1)
-    //         FATAL_EXIT("recv() error");
-    //     s = buf;
-    //     se = buf + n;
-    //     while(s < se)
-    //     {
-    //         if(*s == END)   // 数据边界
-    //         {
-    //             putchar('\n');
-    //             return 0;
-    //         }
-    //         printf("%c", *s);
-    //         s++;
-    //     }
-    // } while (1);
 
     return 0;
 }
 
+// OK
+// 切换到目标目录
 int cmd_cd(char * args)
 {
     memset(buf, 0, BUF_SIZE);
     buf[0] = CD;
-    send(server_fd, buf, 1, 0);
+    if(args != NULL)
+        strncpy(buf + 1, args, BUF_SIZE - 1);
+    send(server_fd, buf, BUF_SIZE, 0);
     PRINT_RESPONSE_BODY;
-    // char * s, *se;
-    // int n;
-    // do
-    // {
-    //     if ((n = recv(server_fd, buf, BUF_SIZE, 0)) == -1)
-    //         FATAL_EXIT("recv() error");
-    //     s = buf;
-    //     se = buf + n;
-    //     while(s < se)
-    //     {
-    //         if(*s == END)   // 数据边界
-    //         {
-    //             putchar('\n');
-    //             return 0;
-    //         }
-    //         printf("%c", *s);
-    //         s++;
-    //     }
-    // } while (1);
 
     return 0;
 }
@@ -261,6 +236,8 @@ int main(int argc, char **argv)
     //     perror(strerror(errno));
     //     FATAL("read_history() error");
     // }
+
+    signal(SIGINT, sig_exit);   // 注册 <C-c> 为 cmd_exit
 
     if (argc == 3)  // 尝试连接给定的主机
     {
