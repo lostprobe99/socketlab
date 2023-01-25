@@ -8,7 +8,7 @@ enum ft_request_type {
     GET,
     PUT,
     EXIT,
-    END =127 
+    END = 127   // 表示一个响应的结束
 };
 
 char* ft_request_str[] = {

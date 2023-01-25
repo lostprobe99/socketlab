@@ -42,6 +42,8 @@ int response_ls(socket_t fd, char * args)
         memset(buf, 0, BUF_SIZE);
         n = sprintf(buf, "open dir `%s` failed: %s", path, strerror(errno));
         send(fd, buf, n, 0);
+        buf[0] = END;
+        send(fd, buf, 1, 0);
         // perror("dir failure");
         return 1;
     }

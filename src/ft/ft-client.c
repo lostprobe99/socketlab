@@ -89,7 +89,6 @@ int cmd_open(char * args)
     if(addr == NULL || port == NULL)
         FATAL_RET(1, "not complete addr");
     server_fd = make_socket(AF_INET, SOCK_STREAM, 0);
-    // server_fd = socket(AF_INET, SOCK_STREAM, 0);
     Assert(server_fd != INVALID_SOCKET, "socket() error");
     sockaddr_in serv_addr = make_sockaddr(AF_INET, addr, atoi(port));
     if(connect(server_fd, (sockaddr*)&serv_addr, sizeof(serv_addr)) == SOCKET_ERROR)
@@ -110,22 +109,26 @@ int cmd_ls(char * args)
         strncpy(buf + 1, args, BUF_SIZE - 1);
     send(server_fd, buf, BUF_SIZE, 0);
     memset(buf, 0, BUF_SIZE);
-    char * s, *se;
-    int n;
-    do
-    {
-        if ((n = recv(server_fd, buf, BUF_SIZE, 0)) == -1)
-            FATAL_EXIT("recv() error");
-        s = buf;
-        se = buf + n;
-        while(s < se)
-        {
-            if(*s == END)   // 数据边界
-                return 0;   // 服务器发送的数据中已添加换行符
-            putchar(*s);
-            s++;
-        }
-    } while (1);
+    PRINT_RESPONSE_BODY;
+    // char * s, *se;
+    // int n;
+    // do
+    // {
+    //     if ((n = recv(server_fd, buf, BUF_SIZE, 0)) == -1)
+    //         FATAL_EXIT("recv() error");
+    //     s = buf;
+    //     se = buf + n;
+    //     while(s < se)
+    //     {
+    //         if(*s == END)   // 数据边界
+    //         {
+    //             putchar('\n');
+    //             return 0;   // 服务器发送的数据中已添加换行符
+    //         }
+    //         putchar(*s);
+    //         s++;
+    //     }
+    // } while (1);
     return 0;
 }
 
@@ -187,25 +190,26 @@ int cmd_pwd(char * args)
     buf[0] = PWD;
     send(server_fd, buf, 1, 0);
     memset(buf, 0, BUF_SIZE);
-    char * s, *se;
-    int n;
-    do
-    {
-        if ((n = recv(server_fd, buf, BUF_SIZE, 0)) == -1)
-            FATAL_EXIT("recv() error");
-        s = buf;
-        se = buf + n;
-        while(s < se)
-        {
-            if(*s == END)   // 数据边界
-            {
-                putchar('\n');
-                return 0;
-            }
-            printf("%c", *s);
-            s++;
-        }
-    } while (1);
+    PRINT_RESPONSE_BODY;
+    // char * s, *se;
+    // int n;
+    // do
+    // {
+    //     if ((n = recv(server_fd, buf, BUF_SIZE, 0)) == -1)
+    //         FATAL_EXIT("recv() error");
+    //     s = buf;
+    //     se = buf + n;
+    //     while(s < se)
+    //     {
+    //         if(*s == END)   // 数据边界
+    //         {
+    //             putchar('\n');
+    //             return 0;
+    //         }
+    //         printf("%c", *s);
+    //         s++;
+    //     }
+    // } while (1);
 
     return 0;
 }
@@ -215,25 +219,26 @@ int cmd_cd(char * args)
     memset(buf, 0, BUF_SIZE);
     buf[0] = CD;
     send(server_fd, buf, 1, 0);
-    char * s, *se;
-    int n;
-    do
-    {
-        if ((n = recv(server_fd, buf, BUF_SIZE, 0)) == -1)
-            FATAL_EXIT("recv() error");
-        s = buf;
-        se = buf + n;
-        while(s < se)
-        {
-            if(*s == END)   // 数据边界
-            {
-                putchar('\n');
-                return 0;
-            }
-            printf("%c", *s);
-            s++;
-        }
-    } while (1);
+    PRINT_RESPONSE_BODY;
+    // char * s, *se;
+    // int n;
+    // do
+    // {
+    //     if ((n = recv(server_fd, buf, BUF_SIZE, 0)) == -1)
+    //         FATAL_EXIT("recv() error");
+    //     s = buf;
+    //     se = buf + n;
+    //     while(s < se)
+    //     {
+    //         if(*s == END)   // 数据边界
+    //         {
+    //             putchar('\n');
+    //             return 0;
+    //         }
+    //         printf("%c", *s);
+    //         s++;
+    //     }
+    // } while (1);
 
     return 0;
 }
