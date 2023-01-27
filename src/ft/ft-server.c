@@ -39,11 +39,11 @@ int response_ls(socket_t fd, char * args)
     DIR * dir;
     if((dir = opendir(path)) == 0)
     {
-        memset(buf, 0, BUF_SIZE);
-        n = sprintf(buf, "open dir `%s` failed: %s", path, strerror(errno));
-        send(fd, buf, n, 0);
-        buf[0] = END;
-        send(fd, buf, 1, 0);
+        memset(msg, 0, BUF_SIZE);
+        n = sprintf(msg, "open dir `%s` failed: %s", path, strerror(errno));    // path 和 buf 在同一块内存
+        send(fd, msg, n, 0);
+        msg[0] = END;
+        send(fd, msg, 1, 0);
         // perror("dir failure");
         return 1;
     }
@@ -98,9 +98,9 @@ int response_cd(socket_t fd, char * args)
 
     if(chdir(path) == -1)
     {
-        memset(buf, 0, BUF_SIZE);
-        n = sprintf(buf, "cd `%s` failed: %s\n", path, strerror(errno));
-        send(fd, buf, n, 0);
+        memset(msg, 0, BUF_SIZE);
+        n = sprintf(msg, "cd `%s` failed: %s\n", path, strerror(errno));
+        send(fd, msg, n, 0);
         response_pwd(fd, path);
     }
     else
@@ -119,14 +119,11 @@ int response_get(socket_t fd, char * args)
     long fsize = get_file_size(filename);
     n = sprintf(msg, "%ld", fsize); // buf 和 filename 指向同一个地址
     // 在文件名后添加分隔符
-    msg[n + 1] = BR;     // 不加客户端卡 97.23%，对于 crc16
-    send(fd, msg, n + 1, 0);
+    send(fd, msg, n, 0);
     printf("send %s\n", filename);
     FILE* fp = fopen(filename, "rb");
     while((n = fread(msg, 1, BUF_SIZE, fp)) != 0)
         send(fd, msg, n, 0);
-    // buf[0] = END;        // 文件中会有等于 END 的字节吗？
-    // send(fd, buf, 1, 0);
     fclose(fp);
 }
 
