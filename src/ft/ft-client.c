@@ -133,7 +133,7 @@ int cmd_get(char * args)
         memset(buf, 0, BUF_SIZE);
         // 接收文件大小
         n = recv(server_fd, buf, BUF_SIZE, 0);  // 文件大小和文件数据会在此处一同接收，导致在 recv_file 中丢失数据从而等待 recv 的情况
-        // 如何划分数据边界
+        // 如何划分数据边界 --> 粘包问题
         fsize = atoi(buf);
         printf("file size: %ld bytes\n", fsize);
         recv_file(server_fd, args, fsize);
