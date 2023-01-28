@@ -62,18 +62,21 @@ cmd_entry cmd_table[] = {
 };
 cmd_config ftc = {.prompt = "ft> ", .cmd_table = cmd_table, .cmd_table_len = sizeof(cmd_table) / sizeof(cmd_table[0]) };
 
-int recv_file(int fd, const char * filename, const long filesize)
+int recv_file(int fd, const char * filename, const long filesize, int recv_len)
 {
     int n = 0;
     long t = 0;
-    // char buf[BUF_SIZE];
+    char * s = buf + sizeof(long);
     FILE *fp = fopen(filename, "wb");
+    n = fwrite(s, 1, recv_len - sizeof(long), fp);
+    t += n;
+    printf("%s: %ld/%ld %.2lf%%\r", filename, t, filesize, 1.0 * t / filesize * 100);
     while(t < filesize)
     {
         memset(buf, 0, BUF_SIZE);
         n = recv(fd, buf, BUF_SIZE, 0);
         t += n;
-        printf("%s: %ld/%ld %.2lf%%\n", filename, t, filesize, 1.0 * t / filesize * 100);
+        printf("%s: %ld/%ld %.2lf%%\r", filename, t, filesize, 1.0 * t / filesize * 100);
         fwrite(buf, 1, n, fp);  // 写 n 次 1 字节
     }
     fclose(fp);
@@ -134,9 +137,10 @@ int cmd_get(char * args)
         // 接收文件大小
         n = recv(server_fd, buf, BUF_SIZE, 0);  // 文件大小和文件数据会在此处一同接收，导致在 recv_file 中丢失数据从而等待 recv 的情况
         // 如何划分数据边界 --> 粘包问题
-        fsize = atoi(buf);
+        fsize = ntohl(*(long*)buf);
+        // fsize = atoi(buf);
         printf("file size: %ld bytes\n", fsize);
-        recv_file(server_fd, args, fsize);
+        recv_file(server_fd, args, fsize, n);
         return 0;
     }
     WARN("file name not given");

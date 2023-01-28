@@ -117,10 +117,10 @@ int response_get(socket_t fd, char * args)
     char * filename = strtok(args, " ");
     int n = 0;
     long fsize = get_file_size(filename);
-    n = sprintf(msg, "%ld", fsize); // buf 和 filename 指向同一个地址
-    // 在文件名后添加分隔符
+    *(uint32_t*)msg = htonl(fsize);
+    n = sizeof(long);   // 前 sizeof(long) 个字节为文件大小
     send(fd, msg, n, 0);
-    printf("send %s\n", filename);
+    printf("file: %s, size: %ld\n", filename, fsize);
     FILE* fp = fopen(filename, "rb");
     while((n = fread(msg, 1, BUF_SIZE, fp)) != 0)
         send(fd, msg, n, 0);
