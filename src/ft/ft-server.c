@@ -13,20 +13,6 @@
 
 char msg[BUF_SIZE], buf[BUF_SIZE];
 
-long get_file_size(const char * filename)
-{
-#if defined(_MSC_VER) || defined(_MSC_EXTENSIONS) || defined(_WIN32)
-    if(_access(filename, 04) == 0)  // 可读
-        return _filelength(fileno(fopen(filename, "rb")));
-#elif linux
-    struct stat st;
-    if(stat(filename, &st) == 0)
-        return st.st_size;
-#endif
-    else
-        return 0;
-}
-
 // OK
 int response_ls(socket_t fd, char * args)
 {
@@ -135,6 +121,12 @@ int response_get(socket_t fd, char * args)
 
 int response_put(socket_t fd, char * args)
 {
+    // 解析文件大小
+    long fsize = ntohl(*(long*)args);
+    // 解析文件名
+    char * filename = args + sizeof(long);
+    printf("file: %s, size: %ld\n", filename, fsize);
+    FILE* fp = fopen(filename, "wb");
 
 }
 

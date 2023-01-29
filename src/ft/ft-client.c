@@ -157,12 +157,25 @@ int cmd_get(char * args)
 
 int cmd_put(char * args)
 {
-    // put 文件大小 文件名
+    // put(1) 文件大小(8) 文件名长度(4) 文件名
+    long fsize = 0;
+    int n = 0, offset = 0;
     if(args != NULL)
     {
+        char * filename = strtok(NULL, " ");
         buf[0] = PUT;
-        strcpy(buf + 1, args);
-        send(server_fd, buf, 1, 0);
+        offset += 1;
+        fsize = get_file_size(filename);
+        *(long*)(buf + offset) = htonl(fsize);   // 保存文件大小
+        offset += sizeof(long);
+        n = strlen(filename);
+        *(int*)(buf + offset) = htonl(n);
+        offset += sizeof(int);
+        strncpy(buf + offset, filename, n);
+        printf("buf decode: %s %ld %d %s\n", ft_request_str[buf[0]], *(long*)(buf + 1), *(int*)(buf + 1 + sizeof(long)), buf + 1 + sizeof(long) + sizeof(int));
+        // exit(0);
+        // send(server_fd, buf, offset + n, 0);
+        // 发送文件
         return 0;
     }
     WARN("file name not given");
