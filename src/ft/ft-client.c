@@ -68,6 +68,7 @@ int recv_file(int fd, const char * filename, const long filesize, int recv_len)
 {
     int n = 0;
     long t = 0;
+    // 文件大小(8) 文件数据
     char * s = buf + sizeof(long);
     FILE *fp = fopen(filename, "wb");
     n = fwrite(s, 1, recv_len - sizeof(long), fp);
@@ -157,11 +158,12 @@ int cmd_get(char * args)
 
 int cmd_put(char * args)
 {
-    // put(1) 文件大小(8) 文件名长度(4) 文件名
     long fsize = 0;
     int n = 0, offset = 0;
+    memset(buf, 0, BUF_SIZE);
     if(args != NULL)
     {
+        // put(1) 文件大小(8) 文件名长度(4) 文件名
         char * filename = strtok(NULL, " ");
         buf[0] = PUT;
         offset += 1;
@@ -172,10 +174,18 @@ int cmd_put(char * args)
         *(int*)(buf + offset) = htonl(n);
         offset += sizeof(int);
         strncpy(buf + offset, filename, n);
-        printf("buf decode: %s %ld %d %s\n", ft_request_str[buf[0]], *(long*)(buf + 1), *(int*)(buf + 1 + sizeof(long)), buf + 1 + sizeof(long) + sizeof(int));
-        // exit(0);
-        // send(server_fd, buf, offset + n, 0);
-        // 发送文件
+        printf("buf decode: %s %ld %d %s\n", ft_request_str[buf[0]], (long)ntohl(*(long*)(buf + 1)), (int)ntohl(*(int*)(buf + 1 + sizeof(long))), buf + 1 + sizeof(long) + sizeof(int));
+        send(server_fd, buf, offset + n, 0);
+        FILE* fp = fopen(filename, "rb");
+        buf[0] = DATA;
+        send(server_fd, buf, 1, 0);
+        // 发送文件体
+        while((n = fread(buf, 1, BUF_SIZE, fp)) != 0)
+            send(server_fd, buf, n, 0);
+        fclose(fp);
+        recv(server_fd, buf, 1, 0);
+        if(buf[0] == END)
+            printf("send `%s` successful\n", filename);
         return 0;
     }
     WARN("file name not given");
@@ -286,6 +296,7 @@ int main(int argc, char **argv)
     }
 
     printf("Type \"help\" for help\n");
+
     minish(&ftc);
 
     // write_history(HISTORY_FILE);

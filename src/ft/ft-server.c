@@ -117,17 +117,43 @@ int response_get(socket_t fd, char * args)
     while((n = fread(msg, 1, BUF_SIZE, fp)) != 0)
         send(fd, msg, n, 0);
     fclose(fp);
+
+    return 0;
+}
+
+static inline long min(long x, long y)
+{
+    return x < y ? x : y;
 }
 
 int response_put(socket_t fd, char * args)
 {
+    long t = 0, n = *(int*)args;
+    int buf_offset = 1;
     // 解析文件大小
-    long fsize = ntohl(*(long*)args);
+    long fsize = ntohl(*(long*)(buf + buf_offset));
+    buf_offset += sizeof(long);
+    int fnlen = ntohl(*(int*)(buf + buf_offset));
+    buf_offset += sizeof(int);
     // 解析文件名
-    char * filename = args + sizeof(long);
+    char filename[256] = {0};
+    strncpy(filename, buf + buf_offset, fnlen);
+    buf_offset += fnlen;
     printf("file: %s, size: %ld\n", filename, fsize);
     FILE* fp = fopen(filename, "wb");
-
+    // 将 buf 中剩余的数据写入文件
+    t += fwrite(buf + buf_offset + 1, 1, n - buf_offset - 1, fp);
+    while(t < fsize)
+    {
+        // 接收剩余的文件数据并保存
+        n = recv(fd, buf, BUF_SIZE, 0);
+        t += n;
+        fwrite(buf, 1, n, fp);
+    }
+    fclose(fp);
+    buf[0] = END;
+    send(fd, buf, 1, 0);
+    return 0;
 }
 
 int main(int argc, char ** argv)
@@ -184,7 +210,7 @@ int main(int argc, char ** argv)
                 response_get(hClientSocket, buf + 1);
                 break;
             case PUT:
-                response_put(hClientSocket, buf + 1);
+                response_put(hClientSocket, (char*)&n);
                 break;
             case EXIT:
                 response_exit(hClientSocket, buf + 1);  // ？？我很疑惑
