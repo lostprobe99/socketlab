@@ -142,7 +142,7 @@ int response_put(socket_t fd, char * args)
     printf("file: %s, size: %ld\n", filename, fsize);
     FILE* fp = fopen(filename, "wb");
     // 将 buf 中剩余的数据写入文件
-    t += fwrite(buf + buf_offset + 1, 1, n - buf_offset - 1, fp);
+    t += fwrite(buf + buf_offset, 1, n - buf_offset, fp);
     while(t < fsize)
     {
         // 接收剩余的文件数据并保存

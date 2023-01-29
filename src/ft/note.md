@@ -33,4 +33,4 @@ extern char *strtok (char *__restrict __s, const char *__restrict __delim)
 
 对空指针解引用时程序会异常终止，并生成 core dump 文件
 
-使用 `gdb program core` 可以查看 core 文件，并显示出 seg fault 时的场景
+使用 `gdb program core` 可以查看 core 文件，使用 `where` 查看 seg fault 时的场景

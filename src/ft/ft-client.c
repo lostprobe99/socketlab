@@ -177,8 +177,6 @@ int cmd_put(char * args)
         printf("buf decode: %s %ld %d %s\n", ft_request_str[buf[0]], (long)ntohl(*(long*)(buf + 1)), (int)ntohl(*(int*)(buf + 1 + sizeof(long))), buf + 1 + sizeof(long) + sizeof(int));
         send(server_fd, buf, offset + n, 0);
         FILE* fp = fopen(filename, "rb");
-        buf[0] = DATA;
-        send(server_fd, buf, 1, 0);
         // 发送文件体
         while((n = fread(buf, 1, BUF_SIZE, fp)) != 0)
             send(server_fd, buf, n, 0);
