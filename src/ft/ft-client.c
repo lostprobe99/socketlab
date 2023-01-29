@@ -45,6 +45,7 @@ char buf[BUF_SIZE];
 int cmd_open(char * args);
 int cmd_ls(char * args);
 int cmd_get(char * args);
+int cmd_put(char * args);
 int cmd_exit(char * args);
 int cmd_help(char * args);
 int cmd_pwd(char * args);
@@ -55,6 +56,7 @@ cmd_entry cmd_table[] = {
     "open", "open <host> <port>, open a ft server", cmd_open,
     "ls", "ls, list directory contents", cmd_ls,
     "get", "get <filename>, download file", cmd_get,
+    "put", "put <filename>, upload file", cmd_put,
     "help", "help, display help information", cmd_help,
     "pwd", "pwd, print current directory", cmd_pwd,
     "cd", "cd <path>, change current directory to <path>", cmd_cd,
@@ -136,9 +138,14 @@ int cmd_get(char * args)
         memset(buf, 0, BUF_SIZE);
         // 接收文件大小
         n = recv(server_fd, buf, BUF_SIZE, 0);  // 文件大小和文件数据会在此处一同接收，导致在 recv_file 中丢失数据从而等待 recv 的情况
+        // 接收文件状态信息
+        if(buf[0] == ERROR) // 第 0 个字节描述是否出错
+        {
+            printf("%s\n", buf + 1);
+            return -1;
+        }
         // 如何划分数据边界 --> 粘包问题
-        fsize = ntohl(*(long*)buf);
-        // fsize = atoi(buf);
+        fsize = ntohl(*(long*)(buf + 1));
         printf("file size: %ld bytes\n", fsize);
         recv_file(server_fd, args, fsize, n);
         return 0;
@@ -146,6 +153,21 @@ int cmd_get(char * args)
     WARN("file name not given");
 
     return 0;
+}
+
+int cmd_put(char * args)
+{
+    // put 文件大小 文件名
+    if(args != NULL)
+    {
+        buf[0] = PUT;
+        strcpy(buf + 1, args);
+        send(server_fd, buf, 1, 0);
+        return 0;
+    }
+    WARN("file name not given");
+
+    return -1;
 }
 
 int cmd_exit(char * args)

@@ -2,6 +2,8 @@
 #define FT_H
 
 enum ft_request_type {
+    ERROR = -1,
+    DATA = 0,
     LS = 1,
     PWD,
     CD,

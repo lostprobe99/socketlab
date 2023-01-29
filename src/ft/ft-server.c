@@ -111,15 +111,21 @@ int response_cd(socket_t fd, char * args)
 
 int response_get(socket_t fd, char * args)
 {
-    // TODO: 解析文件路径中的文件名
     memset(msg, 0, BUF_SIZE);
-    // TODO: 错误处理
     char * filename = strtok(args, " ");
     int n = 0;
+    if(access(filename, R_OK) == -1)
+    {
+        msg[0] = ERROR;
+        n = sprintf(msg + 1,"get `%s` failed: %s", filename, strerror(errno));
+        send(fd, msg, 1 + n, 0);
+        return -1;
+    }
+    msg[0] = DATA;
     long fsize = get_file_size(filename);
-    *(uint32_t*)msg = htonl(fsize);
+    *(uint32_t*)(msg + 1) = htonl(fsize);
     n = sizeof(long);   // 前 sizeof(long) 个字节为文件大小
-    send(fd, msg, n, 0);
+    send(fd, msg, 1 + n, 0);
     printf("file: %s, size: %ld\n", filename, fsize);
     FILE* fp = fopen(filename, "rb");
     while((n = fread(msg, 1, BUF_SIZE, fp)) != 0)
@@ -166,11 +172,9 @@ int main(int argc, char ** argv)
 
     while(1)
     {
-        // 接收文件名，并判断文件是否可读
-        memset(buf, 0, BUF_SIZE);
         // 接收请求，解析请求类型
         n = recv(hClientSocket, buf, BUF_SIZE, 0);
-        buf[n + 1] = 0;
+        buf[n] = 0;
         printf("Got %s\n", ft_request_str[buf[0]]);
         printf("args = `%s`\n", buf + 1);
         switch(buf[0])
@@ -196,21 +200,6 @@ int main(int argc, char ** argv)
             default:
                 break;
         }
-
-        // long file_size = get_file_size(buf);
-        // // 判断文件是否可读
-        // if(file_size != 0)    // 文件大小不为 0
-        // {
-        //     long n = 0;
-        //     send(hClientSocket, (char*)&file_size, 4, 0);     // 发送文件长度
-        //     // 发送文件
-        //     printf("send %s\n", buf);
-        //     FILE *fp = fopen(buf, "rb");
-        //     memset(buf, 0, BUF_SIZE);
-        //     while((n = fread(buf, 1, BUF_SIZE, fp)) != 0)
-        //         send(hClientSocket, buf, n, 0);
-        //     fclose(fp);
-        // }
     }
 
     return 0;
