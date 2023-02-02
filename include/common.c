@@ -17,14 +17,18 @@ socket_t make_socket(int af, int type, int protocol)
 
 sockaddr_in make_sockaddr(int af, const char* addr, unsigned short port)
 {
-    struct hostent* h = gethostbyname(addr);
-    if(!h)
-        FATAL_EXIT("addr `%s` error", addr);
     sockaddr_in sock_addr;
     memset(&sock_addr, 0, sizeof(sockaddr_in));
     sock_addr.sin_family = af;
-    // sock_addr.sin_addr.s_addr = (inet_addr(h->h_addr_list[0]));  // 写错力，做个纪念把
-    sock_addr.sin_addr = *((struct in_addr*)(h->h_addr_list[0]));
     sock_addr.sin_port = htons(port);
+    sock_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    if(addr != NULL)
+    {
+        struct hostent* h = gethostbyname(addr);
+        if(!h)
+            FATAL_EXIT("addr `%s` error", addr);
+        // sock_addr.sin_addr.s_addr = (inet_addr(h->h_addr_list[0]));  // 写错力，做个纪念把
+        sock_addr.sin_addr = *((struct in_addr*)(h->h_addr_list[0]));
+    }
     return sock_addr;
 }
