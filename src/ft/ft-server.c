@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <dirent.h>
 #include <errno.h>
+#include <threads.h>
 
 #include "common.h"
 #include "debug.h"
@@ -69,12 +70,13 @@ int response_exit(socket_t fd, char * args)
     // 关闭线程？
 
     close(fd);
-    exit(0);
+    thrd_exit(0);
 }
 
 // OK
 int response_cd(socket_t fd, char * args)
 {
+    // TODO: 多线程会改变所有线程的目录
     char * path, *s;
     int n = 0;
     if(*args == 0)
@@ -87,10 +89,8 @@ int response_cd(socket_t fd, char * args)
         memset(msg, 0, BUF_SIZE);
         n = sprintf(msg, "cd `%s` failed: %s\n", path, strerror(errno));
         send(fd, msg, n, 0);
-        response_pwd(fd, path);
     }
-    else
-        response_pwd(fd, path);
+    response_pwd(fd, path);
 
     return 0;
 }
@@ -119,11 +119,6 @@ int response_get(socket_t fd, char * args)
     fclose(fp);
 
     return 0;
-}
-
-static inline long min(long x, long y)
-{
-    return x < y ? x : y;
 }
 
 int response_put(socket_t fd, char * args)
@@ -156,6 +151,65 @@ int response_put(socket_t fd, char * args)
     return 0;
 }
 
+socket_t server(unsigned short port)
+{
+    socket_t fd = make_socket(AF_INET, SOCK_STREAM, 0), hClientSocket;
+    Assert(fd != INVALID_SOCKET, "socket() error");
+    
+    // 设置 SO_REUSEADDR
+    int sock_opt = 1, optlen = sizeof(sock_opt);
+    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (void*)&sock_opt, optlen);
+
+    sockaddr_in servAddr = make_sockaddr(AF_INET, NULL, port);
+
+    Assert(bind(fd, (sockaddr *)&servAddr, sizeof(servAddr)) != SOCKET_ERROR, "bind() error");
+
+    Assert(listen(fd, 5) != SOCKET_ERROR, "listen() error");
+    
+    printf("Server starting at %d...\n", port);
+
+    return fd;
+}
+
+int session(void * args)
+{
+    int n = 0;
+    socket_t client_fd = *(socket_t*)args;
+    while(1)
+    {
+        // 接收请求，解析请求类型
+        n = recv(client_fd, buf, BUF_SIZE, 0);
+        buf[n] = 0;
+        printf("Got %s from fd [%d]\n", ft_request_str[buf[0]], client_fd);
+        printf("args = `%s`\n", buf + 1);
+        switch(buf[0])
+        {
+            case LS:
+                response_ls(client_fd, buf + 1);    // OK
+                break;
+            case PWD:
+                response_pwd(client_fd, buf + 1);   // OK
+                break;
+            case CD:
+                response_cd(client_fd, buf + 1);    // OK
+                break;
+            case GET:
+                response_get(client_fd, buf + 1);
+                break;
+            case PUT:
+                response_put(client_fd, (char*)&n);
+                break;
+            case EXIT:
+                response_exit(client_fd, buf + 1);  // ??
+                break;
+            default:
+                break;
+        }
+    }
+
+    return 0;
+}
+
 int main(int argc, char ** argv)
 {
     char * port = "9000";
@@ -164,60 +218,22 @@ int main(int argc, char ** argv)
     //     printf("Usage: %s <port>\n", argv[0]);
     //     return -1;
     // }
-    socket_t hServerSocket = make_socket(AF_INET, SOCK_STREAM, 0), hClientSocket;
-    Assert(hServerSocket != INVALID_SOCKET, "socket() error");
-    
-    // 设置 SO_REUSEADDR
-    int sock_opt = 1, optlen = sizeof(sock_opt);
-    setsockopt(hServerSocket, SOL_SOCKET, SO_REUSEADDR, (void*)&sock_opt, optlen);
-
-    sockaddr_in servAddr = make_sockaddr(AF_INET, "127.0.0.1", atoi(port));
-    servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    sockaddr_in clntAddr;
-
-    Assert(bind(hServerSocket, (sockaddr *)&servAddr, sizeof(servAddr)) != SOCKET_ERROR, "bind() error");
-
-    Assert(listen(hServerSocket, 5) != SOCKET_ERROR, "listen() error");
-    
-    printf("Server starting at %s...\n", argv[1]);
-    
     int n = 0, clnt_addr_size;
+    socket_t fd = server(atoi(port)), client_fd;
+    sockaddr_in clnt_addr;
 
     // TODO: 多线程处理客户端
-    hClientSocket = accept(hServerSocket, (sockaddr *)&clntAddr, &clnt_addr_size);
-    Assert(hClientSocket != -1, "accept() error");
-    printf("Got %s\n", inet_ntoa(clntAddr.sin_addr));   // 解析客户端 ip
-
+    thrd_t t;
+    int state;
     while(1)
     {
-        // 接收请求，解析请求类型
-        n = recv(hClientSocket, buf, BUF_SIZE, 0);
-        buf[n] = 0;
-        printf("Got %s\n", ft_request_str[buf[0]]);
-        printf("args = `%s`\n", buf + 1);
-        switch(buf[0])
-        {
-            case LS:
-                response_ls(hClientSocket, buf + 1);    // OK
-                break;
-            case PWD:
-                response_pwd(hClientSocket, buf + 1);   // OK
-                break;
-            case CD:
-                response_cd(hClientSocket, buf + 1);    // OK
-                break;
-            case GET:
-                response_get(hClientSocket, buf + 1);
-                break;
-            case PUT:
-                response_put(hClientSocket, (char*)&n);
-                break;
-            case EXIT:
-                response_exit(hClientSocket, buf + 1);  // ？？我很疑惑
-                break;
-            default:
-                break;
-        }
+        client_fd = accept(fd, (sockaddr *)&clnt_addr, &clnt_addr_size);
+        printf("Got fd = %d, addr = %s\n", client_fd, inet_ntoa(clnt_addr.sin_addr));   // 解析客户端 ip
+        state = thrd_create(&t, session, &client_fd);
+        if(state != thrd_success)
+            FATAL_EXIT("thread create failed, error code: %d", state);
+        printf("thread [%lu] create successful\n", t);
+        thrd_detach(t);
     }
 
     return 0;
