@@ -69,9 +69,9 @@ int recv_file(int fd, const char * filename, const long filesize, int recv_len)
     int n = 0;
     long t = 0;
     // 文件大小(8) 文件数据
-    char * s = buf + sizeof(long);
+    char * s = buf + sizeof(long) + 1;
     FILE *fp = fopen(filename, "wb");
-    n = fwrite(s, 1, recv_len - sizeof(long), fp);
+    n = fwrite(s, 1, recv_len - sizeof(long) - 1, fp);
     t += n;
     printf("%s: %ld/%ld %.2lf%%\r", filename, t, filesize, 1.0 * t / filesize * 100);
     while(t < filesize)
