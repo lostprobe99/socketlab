@@ -1,2 +1,6 @@
 .vscode
 build
+
+# doxygen 生成的目录
+html
+latex
