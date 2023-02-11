@@ -32,3 +32,21 @@ sockaddr_in make_sockaddr(int af, const char* addr, unsigned short port)
     }
     return sock_addr;
 }
+
+socket_t server(unsigned short port)
+{
+    socket_t fd = make_socket(AF_INET, SOCK_STREAM, 0);
+    Assert(fd != INVALID_SOCKET, "socket() error");
+    
+    // 设置 SO_REUSEADDR
+    int sock_opt = 1, optlen = sizeof(sock_opt);
+    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (void*)&sock_opt, optlen);
+
+    sockaddr_in servAddr = make_sockaddr(AF_INET, NULL, port);
+
+    Assert(bind(fd, (sockaddr *)&servAddr, sizeof(servAddr)) != SOCKET_ERROR, "bind() error");
+
+    Assert(listen(fd, 5) != SOCKET_ERROR, "listen() error");
+
+    return fd;
+}
