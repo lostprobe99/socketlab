@@ -151,25 +151,6 @@ int response_put(socket_t fd, char * args)
     return 0;
 }
 
-socket_t server(unsigned short port)
-{
-    socket_t fd = make_socket(AF_INET, SOCK_STREAM, 0), hClientSocket;
-    Assert(fd != INVALID_SOCKET, "socket() error");
-    
-    // 设置 SO_REUSEADDR
-    int sock_opt = 1, optlen = sizeof(sock_opt);
-    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (void*)&sock_opt, optlen);
-
-    sockaddr_in servAddr = make_sockaddr(AF_INET, NULL, port);
-
-    Assert(bind(fd, (sockaddr *)&servAddr, sizeof(servAddr)) != SOCKET_ERROR, "bind() error");
-
-    Assert(listen(fd, 5) != SOCKET_ERROR, "listen() error");
-    
-    printf("Server starting at %d...\n", port);
-
-    return fd;
-}
 
 int session(void * args)
 {
@@ -220,9 +201,9 @@ int main(int argc, char ** argv)
     // }
     int n = 0, clnt_addr_size;
     socket_t fd = server(atoi(port)), client_fd;
+    printf("Server starting at %d...\n", port);
     sockaddr_in clnt_addr;
 
-    // TODO: 多线程处理客户端
     thrd_t t;
     int state;
     while(1)

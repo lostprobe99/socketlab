@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <errno.h>
 
+#include <netinet/tcp.h>    /// for tcp_info
 #include <dirent.h>
 #include <signal.h>
 
@@ -91,6 +92,8 @@ int recv_file(int fd, const char * filename, const long filesize, int recv_len)
 int cmd_open(char * args)
 {
     // TODO: 关闭已打开的连接
+    struct tcp_info info;
+    
     char * addr = strtok(NULL, " ");
     char * port = strtok(NULL, " ");
     if(addr == NULL || port == NULL)

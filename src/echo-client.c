@@ -3,6 +3,7 @@
 #include<string.h>
 
 #include "common.h"
+#include "debug.h"
 
 #define BUF_SIZE 1024
 
@@ -15,7 +16,7 @@ int main(int argc, char ** argv)
     }
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if(sock == -1)
-        ERROR_HANDLING("socket");
+        FATAL_EXIT("socket");
     int str_len;
     char msg[BUF_SIZE];
 
@@ -31,7 +32,7 @@ int main(int argc, char ** argv)
 
     // connect
     if(connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1)
-        ERROR_HANDLING("connect");
+        FATAL_EXIT("connect");
     else
         puts("Connected...");
 

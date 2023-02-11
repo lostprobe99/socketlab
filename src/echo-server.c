@@ -3,6 +3,7 @@
 #include<string.h>
 
 #include "common.h"
+#include "debug.h"
 
 #define BUF_SIZE 1024
 
@@ -21,7 +22,7 @@ int main(int argc, char ** argv)
     int str_len;
 
     if((serv_sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-        ERROR_HANDLING("socket");
+        FATAL_EXIT("socket");
 
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
@@ -29,17 +30,17 @@ int main(int argc, char ** argv)
     serv_addr.sin_port = htons(atoi(argv[1]));
 
     if((bind(serv_sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr))) == -1)
-        ERROR_HANDLING("bind");
+        FATAL_EXIT("bind");
 
     if(listen(serv_sock, 5) == -1)
-        ERROR_HANDLING("listen");
+        FATAL_EXIT("listen");
     
     // 接受数据
     for(int i = 0; i < 5; i++)
     {
         clnt_sock = accept(serv_sock, (struct sockaddr*)&clnt_addr, &clnt_addr_sz);
         if(clnt_sock == -1)
-            ERROR_HANDLING("accept");
+            FATAL_EXIT("accept");
         else
             printf("Connected client %d\n", i + 1);
         while((str_len = read(clnt_sock, msg, BUF_SIZE)) != 0)

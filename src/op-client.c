@@ -3,6 +3,7 @@
 #include<string.h>
 
 #include "common.h"
+#include "debug.h"
 
 #define BUF_SIZE 1024
 
@@ -16,7 +17,7 @@ int main(int argc, char ** argv)
     int sock, opnd_cnt;
     char opmsg[BUF_SIZE];
     if((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-        ERROR_HANDLING("socket");
+        FATAL_EXIT("socket");
     struct sockaddr_in serv_addr;
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
@@ -26,7 +27,7 @@ int main(int argc, char ** argv)
     else
         serv_addr.sin_addr.s_addr = inet_addr(argv[1]);
     if(connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1)
-        ERROR_HANDLING("connect");
+        FATAL_EXIT("connect");
     else
         puts("Connected...");
 

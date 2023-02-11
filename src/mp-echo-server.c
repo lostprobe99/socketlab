@@ -4,6 +4,7 @@
 #include <signal.h>
 
 #include "common.h"
+#include "debug.h"
 
 #define BUF_SIZE 1024
 
@@ -29,7 +30,7 @@ int main(int argc, char **argv)
 
     int serv_sock = socket(AF_INET, SOCK_STREAM, 0), clnt_sock;
     if (serv_sock == -1)
-        ERROR_HANDLING("socket");
+        FATAL_EXIT("socket");
     sockaddr_in serv_addr, clnt_addr;
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
@@ -37,9 +38,9 @@ int main(int argc, char **argv)
     serv_addr.sin_port = htons(atoi(argv[1]));
 
     if (bind(serv_sock, (sockaddr *)&serv_addr, sizeof(serv_addr)) == -1)
-        ERROR_HANDLING("bind");
+        FATAL_EXIT("bind");
     if (listen(serv_sock, 5) == -1)
-        ERROR_HANDLING("listen");
+        FATAL_EXIT("listen");
 
     pid_t pid;
     char msg[BUF_SIZE];
@@ -49,7 +50,7 @@ int main(int argc, char **argv)
         clnt_sock = accept(serv_sock, (sockaddr *)&clnt_addr, &addr_sz);
         if (clnt_sock == -1)
         {
-            ERROR_P("accept");
+            FATAL("accept");
             continue;
         }
         else
@@ -68,7 +69,7 @@ int main(int argc, char **argv)
         else if (pid > 0)
             close(clnt_sock);
         else
-            ERROR_HANDLING("fork");
+            FATAL_EXIT("fork");
     }
     close(serv_sock);
     #endif

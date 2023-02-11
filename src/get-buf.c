@@ -1,21 +1,22 @@
 /**
  * get-buf.c
  *
- * @Author : lostprobe
- * @Create Date : 2022/02/28 19:10
- * @Description : 查看 socket 缓冲区大小
+ * @author : lostprobe
+ * @date : 2022/02/28 19:10
+ * @bref: 查看 socket 缓冲区大小
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "common.h"
+#include "debug.h"
 
 int main(int argc, char ** argv)
 {
     #if defined(_WIN32) || defined(_WIN64)
     WSADATA wsaData;
     if(WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-       ERROR_HANDLING("WSAStartup");
+       FATAL_EXIT("WSAStartup");
     #endif
     int snd_buf_size = 0, rcv_buf_size = 0;
     int len = sizeof(snd_buf_size), state;
@@ -23,13 +24,13 @@ int main(int argc, char ** argv)
     // 获取发送缓冲区大小
     state = getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (void*)&snd_buf_size, &len);
     if(state)
-        ERROR_HANDLING("getsockopt");
+        FATAL_EXIT("getsockopt");
     printf("snd_buf_size: %d\n", snd_buf_size);
 
     // 获取接收缓冲区大小
     state = getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (void*)&rcv_buf_size, &len);
     if(state)
-        ERROR_HANDLING("getsockopt");
+        FATAL_EXIT("getsockopt");
     printf("rcv_buf_size: %d\n", rcv_buf_size);
 
     /* 

@@ -1,9 +1,9 @@
 /**
  * debug.h
  *
- * @Author : lostprobe
- * @Date   : 2023/01/23 18:25
- * @Brief  : debug.h
+ * @author : lostprobe
+ * @date   : 2023/01/23 18:25
+ * @brief  : debug.h
  */
 
 #pragma once

@@ -1,9 +1,9 @@
 /**
  * signal.c
  *
- * @Author : lostprobe
- * @Date   : 2022/03/01 18:23
- * @Brief  : signal.c
+ * @author : lostprobe
+ * @date   : 2022/03/01 18:23
+ * @brief  : signal.c
  */
 #include <stdio.h>
 #include <stdlib.h>
