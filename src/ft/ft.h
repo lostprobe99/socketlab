@@ -24,6 +24,21 @@ char* ft_request_str[] = {
 };
 
 
+const char * _tcp_state_str_[] = {
+    "",
+    "TCP_ESTABLISHED",
+    "TCP_SYN_SENT",
+    "TCP_SYN_RECV",
+    "TCP_FIN_WAIT1",
+    "TCP_FIN_WAIT2",
+    "TCP_TIME_WAIT",
+    "TCP_CLOSE",
+    "TCP_CLOSE_WAIT",
+    "TCP_LAST_ACK",
+    "TCP_LISTEN",
+    "TCP_CLOSING"
+};
+
 long get_file_size(const char * filename)
 {
 #if defined(_MSC_VER) || defined(_MSC_EXTENSIONS) || defined(_WIN32)
