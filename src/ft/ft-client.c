@@ -40,6 +40,13 @@
         }                                                  \
     } while (1)
 
+#define CONNECT_CHECK                         \
+    if (tcp_connected(server_fd) == 0)        \
+    {                                         \
+        WARN("The server is not connected."); \
+        return -1;                            \
+    }
+
 socket_t server_fd = 0;
 char buf[BUF_SIZE];
 
@@ -113,7 +120,10 @@ int cmd_open(char * args)
 // 查看远程主机的文件
 int cmd_ls(char * args)
 {
-    // TODO: 检测是否连接到远程主机
+    CONNECT_CHECK;
+    struct tcp_info info;
+    if(get_tcp_info(server_fd, &info) == 0)
+        INFO("fd = %d, TCP State: %d [%s]", server_fd, info.tcpi_state, _tcp_state_str_[info.tcpi_state]);
     memset(buf, 0, BUF_SIZE);
     buf[0] = LS;
     if(args != NULL)
@@ -128,11 +138,11 @@ int cmd_ls(char * args)
 // 下载文件
 int cmd_get(char * args)
 {
+    CONNECT_CHECK;
     long fsize = 0;
     int n = 0;
     char * s;
     memset(buf, 0, BUF_SIZE);
-    // TODO: 连接检测
     if(args != NULL)
     {
         buf[0] = GET;   // 单字节无需转换
@@ -161,6 +171,7 @@ int cmd_get(char * args)
 
 int cmd_put(char * args)
 {
+    CONNECT_CHECK;
     long fsize = 0;
     int n = 0, offset = 0;
     memset(buf, 0, BUF_SIZE);
@@ -240,6 +251,7 @@ int cmd_help(char * args)
 // 打印当前所在目录
 int cmd_pwd(char * args)
 {
+    CONNECT_CHECK;
     memset(buf, 0, BUF_SIZE);
     buf[0] = PWD;
     send(server_fd, buf, 1, 0);
@@ -253,6 +265,7 @@ int cmd_pwd(char * args)
 // 切换到目标目录
 int cmd_cd(char * args)
 {
+    CONNECT_CHECK;
     memset(buf, 0, BUF_SIZE);
     buf[0] = CD;
     if(args != NULL)
@@ -287,13 +300,9 @@ int main(int argc, char **argv)
     if (argc == 3)  // 尝试连接给定的主机
     {
         char * addr = argv[1], *port = argv[2];
-        server_fd = make_socket(AF_INET, SOCK_STREAM, 0);
-        Assert(server_fd != INVALID_SOCKET, "socket() error");
-        sockaddr_in serv_addr = make_sockaddr(AF_INET, addr, atoi(port));
-        if(connect(server_fd, (sockaddr*)&serv_addr, sizeof(serv_addr)) == SOCKET_ERROR)
-            WARN("connect %s:%s failed", addr, port);
-        else
-            printf("%s:%s connected\n", addr, port);
+        server_fd = c_connect(addr, atoi(port));
+        Assert(server_fd != -1, "c_connect() error");
+        printf("%s:%s connected\n", addr, port);
     }
 
     printf("Type \"help\" for help\n");

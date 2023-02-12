@@ -194,14 +194,16 @@ int session(void * args)
 int main(int argc, char ** argv)
 {
     char * port = "9000";
-    // if(argc != 2)
-    // {
-    //     printf("Usage: %s <port>\n", argv[0]);
-    //     return -1;
-    // }
+    if(argc != 2)
+    {
+        printf("Usage: %s <port>\n", argv[0]);
+        return -1;
+    }
+    port = argv[1];
     int n = 0, clnt_addr_size;
     socket_t fd = server(atoi(port)), client_fd;
-    printf("Server starting at %d...\n", port);
+    Assert(fd != -1, "server() error");
+    printf("Server starting at %s...\n", port);
     sockaddr_in clnt_addr;
 
     thrd_t t;
