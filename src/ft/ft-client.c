@@ -190,6 +190,7 @@ int cmd_put(char * args)
         strncpy(buf + offset, filename, n);
         printf("buf decode: %s %ld %d %s\n", ft_request_str[buf[0]], (long)ntohl(*(long*)(buf + 1)), (int)ntohl(*(int*)(buf + 1 + sizeof(long))), buf + 1 + sizeof(long) + sizeof(int));
         send(server_fd, buf, offset + n, 0);
+        // TODO: 检查指针
         FILE* fp = fopen(filename, "rb");
         // 发送文件体
         while((n = fread(buf, 1, BUF_SIZE, fp)) != 0)

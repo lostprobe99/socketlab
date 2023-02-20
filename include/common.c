@@ -37,7 +37,7 @@ sockaddr_in make_sockaddr(int af, const char* addr, unsigned short port)
 socket_t server(unsigned short port)
 {
     socket_t fd = make_socket(AF_INET, SOCK_STREAM, 0);
-    if(fd != INVALID_SOCKET)
+    if(fd == INVALID_SOCKET)
         return -1;
     
     // 设置 SO_REUSEADDR
@@ -46,10 +46,10 @@ socket_t server(unsigned short port)
 
     sockaddr_in servAddr = make_sockaddr(AF_INET, NULL, port);
 
-    if(bind(fd, (sockaddr *)&servAddr, sizeof(servAddr)) != SOCKET_ERROR)
+    if(bind(fd, (sockaddr *)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)
         return -1;
 
-    if(listen(fd, 5) != SOCKET_ERROR)
+    if(listen(fd, 5) == SOCKET_ERROR)
         return -1;
 
     return fd;
@@ -58,11 +58,11 @@ socket_t server(unsigned short port)
 socket_t c_connect(const char * addr, unsigned short port)
 {
     int fd = make_socket(AF_INET, SOCK_STREAM, 0);
-    if(fd != INVALID_SOCKET)
+    if(fd == INVALID_SOCKET)
         return -1;
     sockaddr_in serv_addr = make_sockaddr(AF_INET, addr, port);
     
-    if(connect(fd, (sockaddr*)&serv_addr, sizeof(serv_addr)) != SOCKET_ERROR)
+    if(connect(fd, (sockaddr*)&serv_addr, sizeof(serv_addr)) == SOCKET_ERROR)
         return -1;
 
     return fd;
