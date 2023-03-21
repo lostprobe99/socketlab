@@ -82,3 +82,10 @@
         fprintf(stdout, "Norm: " format "\n", ##__VA_ARGS__); \
         fflush(stdout);                                       \
     } while (0)
+
+#define errif(cond, str)    \
+    if (cond)               \
+    {                       \
+        perror(str);        \
+        exit(EXIT_FAILURE); \
+    }
