@@ -22,7 +22,7 @@ add_library(minish STATIC ${INCLUDE}/minish.c)
 target_link_libraries(minish PRIVATE readline)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+# conan_basic_setup()
 
 aux_source_directory(src sources)
 aux_source_directory(test TEST)

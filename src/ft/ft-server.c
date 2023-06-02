@@ -76,7 +76,7 @@ int response_exit(socket_t fd, char * args)
 // OK
 int response_cd(socket_t fd, char * args)
 {
-    // TODO: 多线程会改变所有线程的目录
+    // TODO: 使用进程
     char * path, *s;
     int n = 0;
     if(*args == 0)

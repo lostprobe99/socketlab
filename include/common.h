@@ -28,6 +28,7 @@ typedef SOCKADDR sockaddr;
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <netinet/tcp.h>
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
