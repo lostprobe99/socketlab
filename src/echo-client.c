@@ -40,12 +40,16 @@ int main(int argc, char ** argv)
     {
         printf("Input message(Q to quit): ");
         fgets(msg, BUF_SIZE, stdin);
-        if(!strcmp(msg, "q\n") || !strcmp(msg, "Q\n"))
+        str_len = strlen(msg);
+        if(str_len - 1 == 0 && msg[0] == '\n')
+            continue;
+        msg[str_len - 1] = 0;
+        if(!strcmp(msg, "q") || !strcmp(msg, "Q"))
             break;
-        str_len = write(sock, msg, strlen(msg));
+        str_len = write(sock, msg, str_len - 1);
         str_len = read(sock, msg, BUF_SIZE);
         msg[str_len] = 0;
-        printf("Message from server: %s", msg);
+        printf("Message from server: %s\n", msg);
     }
     close(sock);
 
