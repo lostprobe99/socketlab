@@ -9,6 +9,13 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#if defined(__GNUC__)
+extern void auto_free(void *p);
+    #define AUTOFREE __attribute__((__cleanup__(auto_free)))
+#else
+    #define AUTOFREE assert(0)
+#endif
+
 #if defined(_WIN32) || defined(_WIN64)
 
 #include <winsock2.h>
@@ -28,7 +35,8 @@ typedef SOCKADDR sockaddr;
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <netinet/tcp.h>
+// #include <netinet/tcp.h>
+#include <linux/tcp.h>
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1

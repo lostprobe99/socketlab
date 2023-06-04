@@ -5,6 +5,16 @@
 #include "common.h"
 #include "debug.h"
 
+#if defined(__GNUC__)
+// void *p 表示接收任意类型的参数
+void auto_free(void *p)
+{
+    // 实际上得到的参数是变量的地址
+    void **q = (void**)p;
+    free(*q);
+}
+#endif
+
 socket_t make_socket(int af, int type, int protocol)
 {
     #if defined(_WIN32) || defined(_WIN64)
