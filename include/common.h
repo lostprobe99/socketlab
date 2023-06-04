@@ -9,14 +9,14 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#if defined(__GNUC__)
-extern void auto_free(void *p);
+#if defined(IS_GNU_C) || defined(IS_GNU_CXX)
+    extern void auto_free(void *p);
     #define AUTOFREE __attribute__((__cleanup__(auto_free)))
 #else
-    #define AUTOFREE assert(0)
+    #define AUTOFREE assert(0);
 #endif
 
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef IS_WINDOWS
 
 #include <winsock2.h>
 #include <io.h>
@@ -28,15 +28,15 @@ typedef SOCKET socket_t;
 typedef SOCKADDR_IN sockaddr_in;
 typedef SOCKADDR sockaddr;
 
-#elif __linux
+#elif IS_LINUX
 
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-// #include <netinet/tcp.h>
-#include <linux/tcp.h>
+#include <netinet/tcp.h>
+// #include <linux/tcp.h>
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1

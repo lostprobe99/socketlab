@@ -13,7 +13,7 @@
 
 int main(int argc, char ** argv)
 {
-    #if defined(_WIN32) || defined(_WIN64)
+    #ifdef IS_WINDOWS
     WSADATA wsaData;
     if(WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
        FATAL_EXIT("WSAStartup");

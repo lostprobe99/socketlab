@@ -10,7 +10,7 @@
 
 void childproc(int sig)
 {
-#ifdef linux
+#ifdef IS_LINUX
     int status;
     pid_t id = waitpid(-1, &status, WNOHANG);
     if (WIFEXITED(status))
@@ -25,7 +25,7 @@ int main(int argc, char **argv)
         printf("Usage: %s <port>\n", argv[0]);
         exit(1);
     }
-    #ifdef __linux
+    #ifdef IS_LINUX
     signal(SIGCHLD, childproc);
 
     int serv_sock = socket(AF_INET, SOCK_STREAM, 0), clnt_sock;

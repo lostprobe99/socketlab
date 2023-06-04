@@ -1,11 +1,10 @@
 #include <string.h>
 #include <netdb.h>
-#include <netinet/tcp.h>
 
 #include "common.h"
 #include "debug.h"
 
-#if defined(__GNUC__)
+#if defined(IS_GNU_C) || defined(IS_GNU_CXX)
 // void *p 表示接收任意类型的参数
 void auto_free(void *p)
 {
@@ -17,7 +16,7 @@ void auto_free(void *p)
 
 socket_t make_socket(int af, int type, int protocol)
 {
-    #if defined(_WIN32) || defined(_WIN64)
+    #ifdef IS_WINDOWS
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
         return INVALID_SOCKET;
