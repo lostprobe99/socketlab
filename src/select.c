@@ -41,7 +41,7 @@ int main(int argc, char ** argv)
             if(FD_ISSET(0, &temps))
             {
                 int len = read(0, buf, BUF_SIZE);   // 读入的数据含换行符
-                buf[len] = 0;
+                buf[len] = 0;   // 去除行尾换行符
                 printf("console: %s", buf);
             }
         }
