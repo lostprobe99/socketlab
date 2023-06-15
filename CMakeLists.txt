@@ -48,8 +48,6 @@ aux_source_directory(test TEST)
 list(APPEND sources ${TEST})
 aux_source_directory(src/ft FT)
 list(APPEND sources ${FT})
-aux_source_directory(src/cpp CPP)
-list(APPEND sources ${CPP})
 
 # message(STATUS "Found ${sources} source files\n")
 link_libraries(m)
