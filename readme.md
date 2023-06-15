@@ -6,6 +6,9 @@ socket编程相关
 
 ## changelog:
 
+* 2023-6-16
+    将根目录的`CMakeLists.txt`拆分为子目录
+
 * 2023-6-15
     添加changelog
 
