@@ -1,10 +1,13 @@
 aux_source_directory(${PROJECT_SOURCE_DIR}/src sources)
+
 foreach(main IN LISTS sources)
     message(STATUS "Found source file ${main}")
     get_filename_component(target ${main} NAME_WE)
     add_executable(${target} ${main})
     target_link_libraries(${target} netlib)
     target_link_libraries(${target} buffer)
+    get_filename_component(fname ${main} NAME)
+    target_compile_definitions(${target} PUBLIC FILENAME=${fname})
     # target_link_libraries(${target} minish)
     # target_link_libraries(${mainname} ${CONAN_LIBS})
     # target_compile_definitions(${mainname} PUBLIC ${SYSTEM_MACRO})

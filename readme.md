@@ -7,6 +7,12 @@ socket编程相关
 ## changelog:
 
 * 2023-6-16
+    1. 增加了一个`EXPECT`宏
+    2. 增加了一个`round_two`，用于取大于 n 的最小 2 的幂
+    3. 增加了一个`buffer_make_s`，用于通过字符串创建`buffer`
+    4. 增加了一个`fileno`和`fdopen`的示例
+
+* 2023-6-15
     将根目录的`CMakeLists.txt`拆分为子目录
 
 * 2023-6-15

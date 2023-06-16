@@ -17,10 +17,11 @@ typedef struct {
 #if defined(__GNUC__)
 #define BUFFERFREE __attribute__((__cleanup__(buffer_free)))
 #else
-#define BUFFERFREE assert(0)
+#define BUFFERFREE assert(0);
 #endif
 
 buffer_t* buffer_make(int capacity);
+buffer_t* buffer_make_s(const char * s);
 /// @brief 调整一个 buffer 的容量
 /// @param buf 
 /// @param capacity 新的容量

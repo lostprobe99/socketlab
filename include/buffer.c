@@ -6,6 +6,7 @@
  * @brief  : buffer.c
  */
 #include "buffer.h"
+#include "common.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -22,6 +23,16 @@ buffer_t* buffer_make(int capacity)
         return NULL;
     }
     buf->len = 0;
+    return buf;
+}
+
+buffer_t* buffer_make_s(const char * s)
+{
+    int len = strlen(s);
+    int capacity = round_two(len << 1);
+    buffer_t* buf = buffer_make(capacity);
+    buf->len = len;
+    memcpy(buf->buf, s, len);
     return buf;
 }
 

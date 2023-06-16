@@ -1,6 +1,7 @@
 .vscode
 .cache
 build
+*.tmp
 
 # doxygen 生成的目录
 html
