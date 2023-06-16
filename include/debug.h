@@ -46,14 +46,14 @@
             printf(RED("Test Failed: %s[%d] != %s[%d]\n", (#x1), (x1), (#x2), (x2)));   \
     } while (0)
 
-#define EVAL(s, format) #s ": " format "\n", s 
+#define EVAL(expr, format) #expr ": " format "\n", expr 
 
 #define Assert(cond, format, ...)                                      \
     do                                                                 \
     {                                                                  \
         if (!(cond))                                                   \
         {                                                              \
-            printf(ANSI_FMT(format, ANSI_FG_RED) "", ##__VA_ARGS__); \
+            printf(ANSI_FMT(format, ANSI_FG_RED) "\n", ##__VA_ARGS__); \
             assert(cond);                                              \
         }                                                              \
     } while (0)
@@ -75,7 +75,7 @@
 #define FATAL(format, ...)                                                                                       \
     do                                                                                                           \
     {                                                                                                            \
-        fprintf(stderr, ANSI_FMT("Fatal: %s:%d: " format, ANSI_BG_RED) "", __FILE__, __LINE__, ##__VA_ARGS__); \
+        fprintf(stderr, ANSI_FMT("Fatal: %s:%d: " format, ANSI_BG_RED) "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
     } while (0)
 
 #define WARN(format, ...)                                                                                          \
@@ -87,13 +87,13 @@
 #define INFO(format, ...)                                                                                         \
     do                                                                                                            \
     {                                                                                                             \
-        fprintf(stderr, ANSI_FMT("Info: %s:%d: " format, ANSI_FG_WHITE) "", __FILE__, __LINE__, ##__VA_ARGS__); \
+        fprintf(stderr, ANSI_FMT("Info: %s:%d: " format, ANSI_FG_WHITE) "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
     } while (0)
 
 #define NORM(format, ...)                                     \
     do                                                        \
     {                                                         \
-        fprintf(stdout, "Norm: " format "", ##__VA_ARGS__); \
+        fprintf(stdout, "Norm: " format "\n", ##__VA_ARGS__); \
         fflush(stdout);                                       \
     } while (0)
 
