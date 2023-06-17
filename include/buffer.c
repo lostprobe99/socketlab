@@ -7,6 +7,7 @@
  */
 #include "buffer.h"
 #include "common.h"
+#include "util.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -22,6 +23,7 @@ buffer_t* buffer_make(int capacity)
         free(buf);
         return NULL;
     }
+    memset(buf->buf, 0, buf->capacity);
     buf->len = 0;
     return buf;
 }

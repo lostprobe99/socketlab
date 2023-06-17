@@ -6,6 +6,9 @@ socket编程相关
 
 ## changelog:
 
+* 2023-6-17
+    增加一个epoll实现的回声服务器src/epoll-echo-server.c
+
 * 2023-6-16
     1. 增加了一个`EXPECT`宏
     2. 增加了一个`round_two`，用于取大于 n 的最小 2 的幂

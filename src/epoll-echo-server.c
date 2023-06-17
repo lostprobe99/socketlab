@@ -15,6 +15,7 @@
 
 #include "common.h"
 #include "debug.h"
+#include "buffer.h"
 
 #define MAX_EVENT 1024
 #define BUF_SIZE 1024
@@ -23,30 +24,72 @@ typedef struct epoll_event epoll_event_t;
 
 int main(int argc, char ** argv)
 {
-    int sockfd = server(9000);
-    Assert(sockfd == -1, "server() error");
+    if(argc != 2)
+    {
+        printf("Usage: %s <port>\n", argv[0]);
+        exit(1);
+    }
+    int port = atoi(argv[1]);
+    errno = 0;
+    int sockfd = server(port), clnt_fd;
+    Assert(sockfd != -1, "server() error: %s", strerror(errno));
+    NORM("Server starting at %d...", port);
+    // select 需要在程序中定义 fd_set, epoll 下为操作系统保存
     int epfd = epoll_create1(0);
-    Assert(epfd == -1, "epoll_create1() error");
+    Assert(epfd != -1, "epoll_create1() error: %s", strerror(errno));
+    // epoll_event 用于保存 fd
     epoll_event_t events[MAX_EVENT], ev;
-    ev.events = EPOLLIN;    // ET 模式，未处理错误
+    ev.events = EPOLLIN;    // 需要读数据的情况
     ev.data.fd = sockfd;
     sockaddr_in clnt_addr;
-    socklen_t clnt_addr_len;
+    socklen_t clnt_addr_len = sizeof(clnt_addr);
+    // 添加和删除监视对象, select 下有FD_SET等函数实现, epoll 下通过 epoll_ctl 请求操作系统执行
     epoll_ctl(epfd, EPOLL_CTL_ADD, sockfd, &ev);    // 将服务器 socket fd 添加到 epoll
 
+    buffer_t *buf = buffer_make(64);
     while(1) // 监听 epoll 上的事件
     {
+        // epoll_wait 等待 fd 发生变化
+        // 对应于 select 函数
         int nfds = epoll_wait(epfd, events, MAX_EVENT, -1); // 有 nfds 个 fd 发生事件
+        if(nfds == -1)
+        {
+            FATAL("epoll_wait() error: %s", strerror(errno));
+            break;
+        }
+        printf(EVAL(nfds, "%d"));
         for(int i = 0; i < nfds; ++i)
         {
+            printf(EVAL(events[i].data.fd, "%d"));
             if(events[i].data.fd == sockfd) // 当前服务器 fd 发生事件，表明有新的客户端连接
             {
-                int clnt_fd = accept(sockfd, (sockaddr*)&clnt_addr, &clnt_addr_len);
+                clnt_fd = accept(sockfd, (sockaddr*)&clnt_addr, &clnt_addr_len);
                 ev.data.fd = clnt_fd;
-                ev.events = EPOLLIN | EPOLLET;  // ET 模式处理客户端连接
-                fcntl(clnt_fd, F_SETFL, fcntl(clnt_fd, F_GETFL) | O_NONBLOCK);    // ET 需配合非阻塞 socket 使用
+                ev.events = EPOLLIN;  // | EPOLLET;  // ET 模式处理需要读数据的情况
+                // fcntl(clnt_fd, F_SETFL, fcntl(clnt_fd, F_GETFL) | O_NONBLOCK);    // ET 需配合非阻塞 socket 使用
                 epoll_ctl(epfd, EPOLL_CTL_ADD, clnt_fd, &ev);   // 将客户端 fd 添加到 epoll
+                printf("Got client: fd = %d, addr = %s\n", clnt_fd, inet_ntoa(clnt_addr.sin_addr));
             }
+            else
+            {
+                INFO("reading...");
+                buf->len = read(events[i].data.fd, buf->buf, buf->capacity);
+                buf->buf[buf->len] = 0;
+                INFO("reading end.");
+                if(buf->len == 0)   // 连接关闭
+                {
+                    // 将该 fd 移除监视
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
+                    close(events[i].data.fd);
+                    printf("Client = {fd = %d} closed\n", events[i].data.fd);
+                }
+                else
+                {
+                    printf("Got msg = {`%s`} from client = {fd = %d}\n", buf->buf, events[i].data.fd);
+                    write(events[i].data.fd, buf->buf, buf->len);
+                }
+            }
+            #if 0
             else if(events[i].events & EPOLLIN)
             {
                 // handle event
@@ -74,8 +117,11 @@ int main(int argc, char ** argv)
                 }
                 // 其他错误
             }
+            #endif
         }
     }
+    close(sockfd);
+    close(epfd);
 
     return 0;
 }
