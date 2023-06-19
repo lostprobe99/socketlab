@@ -2,8 +2,10 @@
 #include "InetAddr.h"
 #include "debug.h"
 
+#include <iostream>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <errno.h>
 #include <cstring>
@@ -22,34 +24,51 @@ std::ostream& operator<<(std::ostream& os, const Socket& rhs)
     return os;
 }
 
-Socket::Socket() : _fd(-1)
+Socket::Socket() : _fd(-1), _ref(new int)
 {
     // _fd = socket(AF_INET, SOCK_STREAM, 0);
     // errif(_fd == -1, "socket create error");
 }
 
-Socket::Socket(int fd) : _fd(fd){
+Socket::Socket(int fd) : _fd(fd), _ref(new int)
+{
     errif(_fd == -1, "socket create error");
 }
 
-Socket::Socket(const Socket& rhs)
+Socket::Socket(const Socket& rhs) : _ref(rhs._ref)
 {
     this->_fd = rhs._fd;
-
 }
 
 Socket Socket::open()
 {
-    return Socket(socket(AF_INET, SOCK_STREAM, 0));
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
+    // 设置 SO_REUSEADDR
+    int sock_opt = 1, optlen = sizeof(sock_opt);
+    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (void*)&sock_opt, optlen);
+    return Socket(fd);
 }
 
 Socket::~Socket()
 {
-    if(_fd != -1)
+    if(_ref.use_count() == 1 && _fd != -1)
     {
         close(_fd);
         _fd = -1;
     }
+}
+
+Socket& Socket::operator=(const Socket& rhs)
+{
+    auto tmp = rhs._ref;
+    if(tmp != this->_ref)
+    {
+        this->~Socket();
+        this->_ref = tmp;
+        tmp = nullptr;
+    }
+    this->_fd = rhs._fd;
+    return *this;
 }
 
 void Socket::bind(const InetAddr& addr)
@@ -80,26 +99,14 @@ int Socket::get_fd()
     return _fd;
 }
 
-ssize_t Socket::read(std::vector<char>& buffer)
+ssize_t Socket::read(std::vector<char>& buffer, int nbytes)
 {
-    buffer.clear();
-    char c[1];
-    int s = 0;
-    do
-    {
-        s = ::read(this->_fd, c, 1);
-        if(s == 0)
-            break;
-        else if(s < 0)
-            return s;
-        buffer.push_back(c[0]);
-    } while (s > 0);
-    
-    // while((s = ::read(this->_fd, c, 1)) > 0)
-    // {
-    //     buffer.push_back(c[0]);
-    // }
-    return buffer.size();
+    buffer.reserve(nbytes);
+    buffer.erase(buffer.begin(), buffer.end());
+    int s = ::read(this->_fd, buffer.data(), nbytes);
+    buffer[s] = 0;
+    buffer.erase(buffer.begin() + s, buffer.end());
+    return s;
 }
 
 ssize_t Socket::write(const std::vector<char>& buffer)
