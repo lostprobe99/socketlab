@@ -104,7 +104,10 @@ int cmd_open(char * args)
     char * addr = strtok(NULL, " ");
     char * port = strtok(NULL, " ");
     if(addr == NULL || port == NULL)
-        FATAL_RET(1, "not complete addr");
+    {
+        FATAL("not complete addr");
+        return;
+    }
     server_fd = make_socket(AF_INET, SOCK_STREAM, 0);
     Assert(server_fd != INVALID_SOCKET, "socket() error");
     sockaddr_in serv_addr = make_sockaddr(AF_INET, addr, atoi(port));

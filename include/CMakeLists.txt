@@ -10,3 +10,5 @@ target_link_libraries(minish PRIVATE readline)
 
 add_library(buffer SHARED buffer.c)
 target_link_libraries(buffer PRIVATE util)
+
+add_library(sockobj SHARED Socket.cpp InetAddr.cpp)
