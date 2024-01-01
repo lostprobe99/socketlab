@@ -26,7 +26,7 @@ int main(int argc, char ** argv)
     FILE* fp = fdopen(fd, "w");
     fprintf(fp, "fp to fd\n");
     printf(EVAL(fileno(fp), "%d"));
-    fprintf(fp, buf2);
+    fprintf(fp, "%s", buf2);
 
     fclose(fp);
     close(fd);
