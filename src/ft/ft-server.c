@@ -214,7 +214,7 @@ int main(int argc, char ** argv)
         printf("Got fd = %d, addr = %s\n", client_fd, inet_ntoa(clnt_addr.sin_addr));   // 解析客户端 ip
         state = thrd_create(&t, session, &client_fd);
         if(state != thrd_success)
-            FATAL_EXIT("thread create failed, error code: %d", state);
+            FATAL("thread create failed, error code: %d", state);
         printf("thread [%lu] create successful\n", t);
         thrd_detach(t);
     }

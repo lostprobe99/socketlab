@@ -25,7 +25,7 @@
     do                                                     \
     {                                                      \
         if ((n = recv(server_fd, buf, BUF_SIZE, 0)) == -1) \
-            FATAL_EXIT("recv() error");                    \
+            FATAL("recv() error");                    \
         s = buf;                                           \
         se = buf + n;                                      \
         while (s < se)                                     \
@@ -105,8 +105,8 @@ int cmd_open(char * args)
     char * port = strtok(NULL, " ");
     if(addr == NULL || port == NULL)
     {
-        FATAL("not complete addr");
-        return;
+        ERROR("not complete addr");
+        return 0;
     }
     server_fd = make_socket(AF_INET, SOCK_STREAM, 0);
     Assert(server_fd != INVALID_SOCKET, "socket() error");
@@ -296,7 +296,7 @@ int main(int argc, char **argv)
     // if(read_history(HISTORY_FILE) != 0)
     // {
     //     perror(strerror(errno));
-    //     FATAL("read_history() error");
+    //     ERROR("read_history() error");
     // }
 
     signal(SIGINT, sig_exit);   // 注册 <C-c> 为 cmd_exit

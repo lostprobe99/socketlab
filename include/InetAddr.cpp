@@ -34,7 +34,7 @@ InetAddr::InetAddr(const char * addr, uint16_t port)
         struct hostent* h = gethostbyname(addr);
         if(h == NULL)
         {
-            FATAL("addr = `%s` error", addr);
+            ERROR("addr = `%s` error", addr);
             exit(1);
         }
         this->_addr.sin_addr = *((struct in_addr*)(h->h_addr_list[0]));
@@ -56,7 +56,7 @@ void InetAddr::addr(std::string addr)
         struct hostent* h = gethostbyname(addr.c_str());
         if(h == NULL)
         {
-            FATAL("addr = `%s` error", addr.c_str());
+            ERROR("addr = `%s` error", addr.c_str());
             exit(1);
         }
         this->_addr.sin_addr = *((struct in_addr*)(h->h_addr_list[0]));

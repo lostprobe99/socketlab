@@ -61,7 +61,7 @@ int main(int argc, char ** argv)
 
     serv_sock = socket(AF_INET, SOCK_STREAM, 0);
     if(serv_sock == -1)
-        FATAL_EXIT("socket");
+        FATAL("socket");
 
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
@@ -69,9 +69,9 @@ int main(int argc, char ** argv)
     serv_addr.sin_addr.s_addr = htons(INADDR_ANY);
 
     if(bind(serv_sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1)
-        FATAL_EXIT("bind");
+        FATAL("bind");
     if(listen(serv_sock, 5) == -1)
-        FATAL_EXIT("listen");
+        FATAL("listen");
 
     int opnd_cnt, result;
     int recv_len, recv_cnt;

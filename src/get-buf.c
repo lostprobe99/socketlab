@@ -16,7 +16,7 @@ int main(int argc, char ** argv)
     #ifdef IS_WINDOWS
     WSADATA wsaData;
     if(WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-       FATAL_EXIT("WSAStartup");
+       FATAL("WSAStartup");
     #endif
     int snd_buf_size = 0, rcv_buf_size = 0;
     int len = sizeof(snd_buf_size), state;
@@ -24,13 +24,13 @@ int main(int argc, char ** argv)
     // 获取发送缓冲区大小
     state = getsockopt(sock, SOL_SOCKET, SO_SNDBUF, (void*)&snd_buf_size, &len);
     if(state)
-        FATAL_EXIT("getsockopt");
+        FATAL("getsockopt");
     printf("snd_buf_size: %d\n", snd_buf_size);
 
     // 获取接收缓冲区大小
     state = getsockopt(sock, SOL_SOCKET, SO_RCVBUF, (void*)&rcv_buf_size, &len);
     if(state)
-        FATAL_EXIT("getsockopt");
+        FATAL("getsockopt");
     printf("rcv_buf_size: %d\n", rcv_buf_size);
 
     /* 

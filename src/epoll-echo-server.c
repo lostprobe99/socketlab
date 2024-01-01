@@ -54,7 +54,7 @@ int main(int argc, char ** argv)
         int nfds = epoll_wait(epfd, events, MAX_EVENT, -1); // 有 nfds 个 fd 发生事件
         if(nfds == -1)
         {
-            FATAL("epoll_wait() error: %s", strerror(errno));
+            ERROR("epoll_wait() error: %s", strerror(errno));
             break;
         }
         printf(EVAL(nfds, "%d"));

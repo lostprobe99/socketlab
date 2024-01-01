@@ -16,7 +16,7 @@ int main(int argc, char ** argv)
     }
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if(sock == -1)
-        FATAL_EXIT("socket");
+        FATAL("socket");
     int str_len;
     char msg[BUF_SIZE];
 
@@ -32,7 +32,7 @@ int main(int argc, char ** argv)
 
     // connect
     if(connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1)
-        FATAL_EXIT("connect");
+        FATAL("connect");
     else
         puts("Connected...");
 
