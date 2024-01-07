@@ -7,6 +7,10 @@ socket编程相关
 ## changelog:
 
 * 2024-1-7
+    1. 移除`Socket`的拷贝构造函数和拷贝赋值函数，添加移动构造函数和移动赋值函数
+    2. 将`Socket`的socket关闭操作拆分为单独的函数
+
+* 2024-1-7
     1. 调整目录结构，将`Socket`和`InetAddr`拆分到`lib/simplesocket`
 
 * 2023-6-19

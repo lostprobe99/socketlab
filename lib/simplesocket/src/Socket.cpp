@@ -24,20 +24,29 @@ std::ostream& operator<<(std::ostream& os, const Socket& rhs)
     return os;
 }
 
-Socket::Socket() : _fd(-1), _ref(new int)
+Socket::Socket() : _fd(-1)
 {
-    // _fd = socket(AF_INET, SOCK_STREAM, 0);
-    // errif(_fd == -1, "socket create error");
 }
 
-Socket::Socket(int fd) : _fd(fd), _ref(new int)
+Socket::Socket(int fd) : _fd(fd)
 {
     errif(_fd == -1, "socket create error");
 }
 
-Socket::Socket(const Socket& rhs) : _ref(rhs._ref)
+Socket::Socket(Socket &&other) noexcept : _fd(other._fd)
 {
-    this->_fd = rhs._fd;
+    other._fd = -1;
+}
+
+Socket& Socket::operator=(Socket&& other)
+{
+    if(this != &other)
+    {
+        this->close();
+        this->_fd = other._fd;
+        other._fd = -1;
+    }
+    return *this;
 }
 
 Socket Socket::open()
@@ -51,24 +60,7 @@ Socket Socket::open()
 
 Socket::~Socket()
 {
-    if(_ref.use_count() == 1 && _fd != -1)
-    {
-        close(_fd);
-        _fd = -1;
-    }
-}
-
-Socket& Socket::operator=(const Socket& rhs)
-{
-    auto tmp = rhs._ref;
-    if(tmp != this->_ref)
-    {
-        this->~Socket();
-        this->_ref = tmp;
-        tmp = nullptr;
-    }
-    this->_fd = rhs._fd;
-    return *this;
+    close();
 }
 
 void Socket::bind(const InetAddr& addr)
@@ -113,4 +105,13 @@ ssize_t Socket::write(const std::vector<char>& buffer)
 {
     auto len = ::write(this->_fd, buffer.data(), buffer.size());
     return len;
+}
+
+void Socket::close()
+{
+    if(_fd != -1)
+    {
+        ::close(_fd);
+        _fd = -1;
+    }
 }

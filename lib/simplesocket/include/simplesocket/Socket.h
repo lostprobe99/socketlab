@@ -14,13 +14,14 @@ private:
     friend std::ostream& operator<<(std::ostream& os, const Socket&);
     int _fd;
 public:
-    std::shared_ptr<int> _ref;
     Socket();
     Socket(int);
-    Socket(const Socket&);
+    Socket(const Socket&) = delete;
+    Socket(Socket&& other) noexcept;
     ~Socket();
 
-    Socket& operator=(const Socket&);
+    Socket& operator=(const Socket&) = delete;
+    Socket& operator=(Socket&&);
 
     static Socket open();
 
@@ -32,6 +33,7 @@ public:
     int accept(InetAddr& );
     ssize_t read(std::vector<char>& , int);
     ssize_t write(const std::vector<char>&);
+    void close();
 
     int get_fd();
 };
