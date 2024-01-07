@@ -9,7 +9,7 @@ foreach(main IN LISTS sources)
 
     target_link_libraries(${target} netlib)
     target_link_libraries(${target} buffer)
-    target_link_libraries(${target} sockobj)
+    target_link_libraries(${target} SimpleSocket)
     # target_link_libraries(${target} minish)
     # target_link_libraries(${mainname} ${CONAN_LIBS})
     # target_compile_definitions(${mainname} PUBLIC ${SYSTEM_MACRO})

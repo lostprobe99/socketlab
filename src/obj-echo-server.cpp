@@ -11,8 +11,8 @@
 #include <cerrno>
 #include <cstring>
 #include <unistd.h>
-#include "InetAddr.h"
-#include "Socket.h"
+#include "simplesocket/InetAddr.h"
+#include "simplesocket/Socket.h"
 
 int main(int argc, char ** argv)
 {

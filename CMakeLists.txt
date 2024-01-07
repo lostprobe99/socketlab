@@ -31,7 +31,7 @@ add_definitions(-D${SYSTEM_MACRO})
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(INCLUDE ./include)
+set(INCLUDE ./include ./lib/simplesocket/include)
 
 include_directories(${INCLUDE})
 
@@ -43,3 +43,4 @@ link_libraries(m)   # 连接 math 库
 add_subdirectory(./include)
 add_subdirectory(./src)
 add_subdirectory(./test)
+add_subdirectory(./lib/simplesocket)
