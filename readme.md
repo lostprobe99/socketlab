@@ -6,6 +6,9 @@ socket编程相关
 
 ## changelog:
 
+* 2024-1-7
+    1. 调整目录结构，将`Socket`和`InetAddr`拆分到`lib/simplesocket`
+
 * 2023-6-19
     1. 为`Socket`添加一个`shared_ptr`作为引用计数来控制复制和析构
     2. 使用`Socket`和`InetAddr`实现一个回声服务器[src/obj-echo-server.c](src/obj-echo-server.cpp)
