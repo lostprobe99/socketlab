@@ -40,7 +40,7 @@ Socket::Socket(Socket &&other) noexcept : _fd(other._fd)
 
 Socket& Socket::operator=(Socket&& other)
 {
-    if(this != &other)
+    if (this != &other)
     {
         this->close();
         this->_fd = other._fd;
@@ -109,7 +109,7 @@ ssize_t Socket::write(const std::vector<char>& buffer)
 
 void Socket::close()
 {
-    if(_fd != -1)
+    if (_fd != -1)
     {
         ::close(_fd);
         _fd = -1;
