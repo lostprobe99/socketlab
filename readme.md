@@ -6,6 +6,10 @@ socket编程相关
 
 ## changelog:
 
+* 2024-1-20
+    1. 为`InetAddr`添加了一个af函数
+    2. 修改了`InetAddr::addr`函数中`inet_addr`的使用错误
+
 * 2024-1-7
     1. 移除`Socket`的拷贝构造函数和拷贝赋值函数，添加移动构造函数和移动赋值函数
     2. 将`Socket`的socket关闭操作拆分为单独的函数

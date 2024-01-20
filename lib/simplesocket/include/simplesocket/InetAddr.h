@@ -21,5 +21,6 @@ public:
     uint16_t port() const;
     void port(uint16_t port);
     uint16_t af() const;
+    void af(uint16_t family);
     ~InetAddr();
 };

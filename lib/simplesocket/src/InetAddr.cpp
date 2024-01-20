@@ -2,6 +2,7 @@
 #include "debug.h"
 #include <netdb.h>
 #include <cstring>
+#include <stdexcept>
 
 std::string to_string(const InetAddr& value)
 {
@@ -26,19 +27,9 @@ InetAddr::InetAddr(const char * addr, uint16_t port)
 {
     bzero(&_addr, sizeof(_addr));
     _addr.sin_family = AF_INET;
-    _addr.sin_addr.s_addr = (INADDR_ANY);
-    _addr.sin_port = htons(port);
     _addr_len = sizeof(_addr);
-    if(addr != NULL)
-    {
-        struct hostent* h = gethostbyname(addr);
-        if(h == NULL)
-        {
-            ERROR("addr = `%s` error", addr);
-            exit(1);
-        }
-        this->_addr.sin_addr = *((struct in_addr*)(h->h_addr_list[0]));
-    }
+    this->addr(addr);
+    this->port(port);
 }
 
 std::string InetAddr::addr() const
@@ -49,19 +40,16 @@ std::string InetAddr::addr() const
 
 void InetAddr::addr(std::string addr)
 {
-    this->_addr.sin_addr.s_addr = inet_addr(INADDR_ANY);
+    this->_addr.sin_addr.s_addr = (INADDR_ANY);
     if(!addr.empty())
     {
-
         struct hostent* h = gethostbyname(addr.c_str());
         if(h == NULL)
         {
-            ERROR("addr = `%s` error", addr.c_str());
-            exit(1);
+            throw std::runtime_error("Failed to resolve hostname: gethostbyname() returned NULL, herrno: " + std::string(hstrerror(errno)));
         }
         this->_addr.sin_addr = *((struct in_addr*)(h->h_addr_list[0]));
     }
-        // this->_addr.sin_addr.s_addr = inet_addr(addr.c_str());
 }
 
 uint16_t InetAddr::port() const
@@ -77,6 +65,11 @@ void InetAddr::port(uint16_t port)
 uint16_t InetAddr::af() const
 {
     return this->_addr.sin_family;
+}
+
+void InetAddr::af(uint16_t family)
+{
+    _addr.sin_family = family;
 }
 
 InetAddr::~InetAddr()
