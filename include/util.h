@@ -15,5 +15,11 @@
 /// @return 
 int round_two(int x);
 
+/// @brief 可接收格式化字符串的system()函数
+/// @param fmt 格式字符串
+/// @param ... 格式字符串的参数
+/// @return system()函数的返回值
+int systemf(const char * fmt, ...);
+
 
 #endif // UTIL_H
