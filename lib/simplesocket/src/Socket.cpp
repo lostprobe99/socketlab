@@ -30,7 +30,6 @@ Socket::Socket() : _fd(-1)
 
 Socket::Socket(int fd) : _fd(fd)
 {
-    errif(_fd == -1, "socket create error");
 }
 
 Socket::Socket(Socket &&other) noexcept : _fd(other._fd)
@@ -49,28 +48,14 @@ Socket& Socket::operator=(Socket&& other)
     return *this;
 }
 
-Socket Socket::open()
-{
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
-    // 设置 SO_REUSEADDR
-    int sock_opt = 1, optlen = sizeof(sock_opt);
-    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (void*)&sock_opt, optlen);
-    return Socket(fd);
-}
-
 Socket::~Socket()
 {
     close();
 }
 
-void Socket::bind(const InetAddr& addr)
+int Socket::bindWrap(const InetAddr& addr)
 {
-    errif(::bind(_fd, (struct sockaddr*)&addr._addr, addr._addr_len) == -1, "bind error");
-}
-
-void Socket::listen()
-{
-    errif(::listen(_fd, 5) == -1, "listen error");
+    return ::bind(_fd, (struct sockaddr*)&addr._addr, addr._addr_len);
 }
 
 void Socket::setnonblocking()
@@ -78,11 +63,9 @@ void Socket::setnonblocking()
     fcntl(_fd, F_SETFL, fcntl(_fd, F_GETFL) | O_NONBLOCK);
 }
 
-// Socket Socket::accept(InetAddr& clnt_addr)
-int Socket::accept(InetAddr& clnt_addr)
+int Socket::acceptWrap(InetAddr& clnt_addr)
 {
     int clnt_fd = ::accept(_fd, (struct sockaddr*)&clnt_addr._addr, &clnt_addr._addr_len);
-    errif(clnt_fd == -1, "accept error");
     return clnt_fd;
 }
 
