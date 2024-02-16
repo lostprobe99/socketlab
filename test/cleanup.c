@@ -33,7 +33,7 @@ int main(int argc, char ** argv)
     n = 5;
 
     AUTOFREE char * p = malloc(16 * sizeof(char));
-    memset(p, 8 * sizeof(char), 0);
+    memset(p, 0, 8 * sizeof(char));
     printf("allocate at %p\n", p);
 
     return 0;

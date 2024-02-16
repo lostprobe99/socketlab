@@ -6,6 +6,10 @@ socket编程相关
 
 ## changelog:
 
+* 2024-2-16
+    1. 添加udp实现的echo客户端[src/uecho-client.c](src/uecho-client.c)和服务器[src/uecho-server.c](src/uecho-server.c)
+    2. 为debug宏`FATAL`和`WARN`添加换行
+
 * 2024-1-20
     1. 为`InetAddr`添加了一个af函数
     2. 修改了`InetAddr::addr`函数中`inet_addr`的使用错误

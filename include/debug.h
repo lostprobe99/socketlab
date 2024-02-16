@@ -61,7 +61,7 @@
 #define FATAL(format, ...)                                                                                  \
     do                                                                                                           \
     {                                                                                                            \
-        fprintf(stderr, ANSI_FMT("Fatal: %s:%d: " format, ANSI_BG_RED) "", __FILE__, __LINE__, ##__VA_ARGS__); \
+        fprintf(stderr, ANSI_FMT("Fatal: %s:%d: " format, ANSI_BG_RED) "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
         exit(1);                                                                                                 \
     } while (0)
 
@@ -74,7 +74,7 @@
 #define WARN(format, ...)                                                                                          \
     do                                                                                                             \
     {                                                                                                              \
-        fprintf(stderr, ANSI_FMT("Warning: %s:%d: " format, ANSI_FG_RED) "", __FILE__, __LINE__, ##__VA_ARGS__); \
+        fprintf(stderr, ANSI_FMT("Warning: %s:%d: " format, ANSI_FG_RED) "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
     } while (0)
 
 #define INFO(format, ...)                                                                                         \
