@@ -6,6 +6,9 @@ socket编程相关
 
 ## changelog:
 
+* 2024-2-18
+    1. 添加`TcpSocket`实现的多线程echo服务端[src/tcpsocket-server.cpp](src/tcpsocket-server.cpp)
+
 * 2024-2-16
     1. 添加udp实现的echo客户端[src/uecho-client.c](src/uecho-client.c)和服务器[src/uecho-server.c](src/uecho-server.c)
     2. 为debug宏`FATAL`和`WARN`添加换行
