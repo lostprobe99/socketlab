@@ -6,6 +6,12 @@ socket编程相关
 
 ## changelog:
 
+* 2024-9-1
+    1. 添加获取网络接口的示例[src/get_itfs](src/get_itfs.c)
+
+* 2024-7-7
+    1. 添加守护进程示例[src/daemon.c](src/daemon.c)
+
 * 2024-2-18
     1. 添加`TcpSocket`实现的多线程echo服务端[src/tcpsocket-server.cpp](src/tcpsocket-server.cpp)
 
