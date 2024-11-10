@@ -9,6 +9,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <unistd.h>
+#include <time.h>
+#include <sys/time.h>
+
+#include "util.h"
 
 int round_two(int x)
 {
@@ -33,6 +38,7 @@ int round_two(int x)
 
 int systemf(const char * fmt, ...)
 {
+    int res = 0;
     va_list args;
     va_start(args, fmt);
     int len = vsnprintf(NULL, 0, fmt, args);
@@ -49,12 +55,20 @@ int systemf(const char * fmt, ...)
         perror("Memory alloction failed");
         return -1;
     }
+
+    va_start(args, fmt);
     vsnprintf(cmd, len + 1, fmt, args);
     va_end(args);
 
-    int res = system(cmd);
-
+    res = system(cmd);
     free(cmd);
 
     return res;
+}
+
+uint64_t timestamp()
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (uint64_t)tv.tv_sec * 1000 + (uint64_t)tv.tv_usec / 1000;
 }
