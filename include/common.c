@@ -91,3 +91,10 @@ int get_tcp_info(socket_t fd, struct tcp_info* info)
     int info_size = sizeof(struct tcp_info);
     return getsockopt(fd, IPPROTO_TCP, TCP_INFO, info, (socket_t*)&info_size);
 }
+
+int set_broadcast(socket_t fd)
+{
+    // 设置广播
+    int val = 1;
+    return setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &val, sizeof(val));
+}

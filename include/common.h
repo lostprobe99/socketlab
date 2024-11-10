@@ -30,13 +30,15 @@ typedef SOCKADDR sockaddr;
 
 #elif IS_LINUX
 
+// #define __USE_MISC
+
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <netinet/tcp.h>
 // #include <linux/tcp.h>
+#include <netinet/tcp.h>
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
@@ -81,5 +83,10 @@ int tcp_connected(socket_t fd);
 /// @retval 0 - 获取成功
 /// @retval 1 - 失败
 int get_tcp_info(socket_t fd, struct tcp_info* info);
+
+/// @brief 将 fd 设置为广播模式
+/// @param fd socket
+/// @return 
+int set_broadcast(socket_t fd);
 
 #endif // COMMON_H
