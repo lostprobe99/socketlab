@@ -57,11 +57,11 @@ typedef struct _arp_msg_
 
 int arping(const char *itf, char * target_ip);
 
-int get_mac(const char *itf, struct sockaddr_ll *addr);
+int get_itf_mac(const char *itf, struct sockaddr_ll *addr);
 
-int get_ip4(const char *itf, struct sockaddr_in *addr);
+int get_itf_ip4(const char *itf, struct sockaddr_in *addr);
 
-int get_subnet_mask(const char *itf, struct sockaddr_in *addr);
+int get_itf_subnet_mask(const char *itf, struct sockaddr_in *addr);
 
 // 平台无关
 

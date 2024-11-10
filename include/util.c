@@ -122,7 +122,7 @@ uint32_t reverse32(uint32_t x)
         | x >> 24);
 }
 
-int get_mac(const char *itf, struct sockaddr_ll *addr)
+int get_itf_mac(const char *itf, struct sockaddr_ll *addr)
 {
     struct ifreq ifr;
     int sock_fd = -1;
@@ -159,7 +159,7 @@ int get_mac(const char *itf, struct sockaddr_ll *addr)
     return 0;
 }
 
-int get_ip4(const char *itf, struct sockaddr_in *addr)
+int get_itf_ip4(const char *itf, struct sockaddr_in *addr)
 {
     struct ifreq ifr;
     int sock_fd = -1;
@@ -193,7 +193,7 @@ int get_ip4(const char *itf, struct sockaddr_in *addr)
     return 0;
 }
 
-int get_subnet_mask(const char *itf, struct sockaddr_in *addr)
+int get_itf_subnet_mask(const char *itf, struct sockaddr_in *addr)
 {
     struct ifreq ifr;
     int sock_fd = -1;
@@ -256,11 +256,11 @@ int arping(const char *itf, char * target_ip)
     printf("网卡索引: %d\n", ifindex);
 
     // 获取网卡 MAC
-    get_mac(itf, &src_hwaddr);
+    get_itf_mac(itf, &src_hwaddr);
     printf("网卡MAC: %02X:%02X:%02X:%02X:%02X:%02X\n", ALL_MAC_BYTE((uint8_t)src_hwaddr.sll_addr));
 
     // 获取网卡 IP
-    get_ip4(itf, &src_ip4);
+    get_itf_ip4(itf, &src_ip4);
     printf("网卡 IP: %s\n", inet_ntoa(src_ip4.sin_addr));
 
     // 以太网帧的目标 MAC 为广播MAC，全1
