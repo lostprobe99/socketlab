@@ -121,3 +121,107 @@ uint32_t reverse32(uint32_t x)
         | (x >> 8) & 0x0000ff00
         | x >> 24);
 }
+
+int get_mac(const char *itf, struct sockaddr_ll *addr)
+{
+    struct ifreq ifr;
+    int sock_fd = -1;
+    struct sockaddr_ll *sa_ll = addr;
+
+    if(addr == NULL)
+    {
+        return -1;
+    }
+
+    // a socket, any type is ok
+    sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if(sock_fd == -1)
+    {
+        perror("socket()");
+        return -2;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+    strncpy(ifr.ifr_name, itf, sizeof(ifr.ifr_name));
+    
+    // 获取网卡 MAC
+    if(ioctl(sock_fd, SIOCGIFHWADDR, &ifr) == -1)
+    {
+        close(sock_fd);
+        perror("SIOCGIFHWADDR");
+        return -3;
+    }
+
+    memcpy(sa_ll->sll_addr, ifr.ifr_hwaddr.sa_data, ETH_ALEN);
+    // printf("网卡MAC: %02X:%02X:%02X:%02X:%02X:%02X\n", ALL_MAC_BYTE((uint8_t)sa_ll->sll_addr));
+
+    close(sock_fd);
+    return 0;
+}
+
+int get_ip4(const char *itf, struct sockaddr_in *addr)
+{
+    struct ifreq ifr;
+    int sock_fd = -1;
+    struct sockaddr_in *sa_ll = addr;
+
+    if(addr == NULL)
+    {
+        return -1;
+    }
+
+    sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if(sock_fd == -1)
+    {
+        perror("socket()");
+        return -2;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+    strncpy(ifr.ifr_name, itf, sizeof(ifr.ifr_name));
+    
+    // 获取网卡 IP
+    if(ioctl(sock_fd, SIOCGIFADDR, &ifr) == -1)
+    {
+        close(sock_fd);
+        perror("SIOCGIFADDR");
+        return -3;
+    }
+    memcpy(addr, &ifr.ifr_addr, sizeof(struct sockaddr));
+
+    close(sock_fd);
+    return 0;
+}
+
+int get_subnet_mask(const char *itf, struct sockaddr_in *addr)
+{
+    struct ifreq ifr;
+    int sock_fd = -1;
+
+    if(addr == NULL)
+    {
+        return -1;
+    }
+
+    sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if(sock_fd == -1)
+    {
+        perror("socket()");
+        return -2;
+    }
+
+    memset(&ifr, 0, sizeof(ifr));
+    strncpy(ifr.ifr_name, itf, sizeof(ifr.ifr_name));
+    
+    // 获取网卡 IP
+    if(ioctl(sock_fd, SIOCGIFNETMASK, &ifr) == -1)
+    {
+        close(sock_fd);
+        perror("SIOCGIFNETMASK");
+        return -3;
+    }
+    memcpy(addr, &ifr.ifr_addr, sizeof(struct sockaddr));
+
+    close(sock_fd);
+    return 0;
+}
