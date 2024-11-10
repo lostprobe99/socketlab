@@ -22,6 +22,41 @@
 #include <linux/if_packet.h>    // for struct sockaddr_ll
 #include <linux/if_arp.h>
 
+#define ALL_MAC_BYTE(x) x[0], x[1], x[2], x[3], x[4], x[5]
+#define ALL_IP_BYTE(x) x[0], x[1], x[2], x[3]
+
+// ARP包结构
+// 字段顺序不可更改
+typedef struct _arp_msg_
+{
+#define IPV4_LEN 4
+    /* 以太网头 */
+    /* +------+------+------+ */
+    /* | 目地AC | 源MAC | 协议类型 | */
+    /* +------+------+------+ */
+    /* | 6字节  | 6字节  | 2字节  | */
+    /* +------+------+------+ */
+    uint8_t dest_mac[6];    /* 目的MAC */
+    uint8_t source_mac[6];     /* 源MAC */
+    uint16_t proto_type;    /* 协议类型 */
+
+    /* arp头 */
+    uint16_t hardware_type; // 硬件类型#1:Ethernet
+    uint16_t protocol_type; // 协议类型#0x0800:IPv4
+    uint8_t  hardware_size; // MAC地址长度#6
+    uint8_t  protocol_size; // IP地址长度#4
+    uint16_t opcode;        // ARP类型#1:request; 2:reply
+    uint8_t  sender_mac[ETH_ALEN];  // 源MAC
+    uint8_t  sender_ip[IPV4_LEN];   // 源IP地址
+    uint8_t  target_mac[ETH_ALEN];  // 目标MAC
+    uint8_t  target_ip[IPV4_LEN];   // 目标IP
+
+    /* 18字节填充 */
+    uint8_t padding[18];
+}arp_msg_t;
+
+int arping(const char *itf, char * target_ip);
+
 int get_mac(const char *itf, struct sockaddr_ll *addr);
 
 int get_ip4(const char *itf, struct sockaddr_in *addr);
