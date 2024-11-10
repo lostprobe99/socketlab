@@ -6,6 +6,17 @@ socket编程相关
 
 ## changelog:
 
+* 2024-9-1 ~ 2024-11-10
+    1. 修复`systemf`中的错误
+    2. 添加一个时间戳获取函数`timestamp`
+    3. 添加 `hexdump`, `hexdump1` 和 `reverse32` 函数
+    4. 添加 `get_itf_mac`, `get_itf_ip4` 和 `get_itf_subnet_mask` 函数
+    5. 添加 `arping` 函数
+    6. 添加 [`arping` demo](src/arping.c)
+    7. 添加 `set_broadcast` 函数
+    8. 添加 `broadcast` [收](src/broadcast_listen.c)[发](src/broadcast_send.c)的demo
+    9. 添加 [`popen` demo](test/popen.c)
+
 * 2024-9-1
     1. 添加获取网络接口的示例[src/get_itfs](src/get_itfs.c)
 
