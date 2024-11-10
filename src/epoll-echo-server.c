@@ -46,7 +46,9 @@ int main(int argc, char ** argv)
     // 添加和删除监视对象, select 下有FD_SET等函数实现, epoll 下通过 epoll_ctl 请求操作系统执行
     epoll_ctl(epfd, EPOLL_CTL_ADD, sockfd, &ev);    // 将服务器 socket fd 添加到 epoll
 
-    buffer_t *buf = buffer_make(64);
+    char buf[64] = {0};
+    int buf_len = 0;
+    int buf_size = sizeof(buf);
     while(1) // 监听 epoll 上的事件
     {
         // epoll_wait 等待 fd 发生变化
@@ -73,10 +75,10 @@ int main(int argc, char ** argv)
             else
             {
                 INFO("reading...");
-                buf->len = read(events[i].data.fd, buf->buf, buf->capacity);
-                buf->buf[buf->len] = 0;
+                buf_len = read(events[i].data.fd, buf, buf_size);
+                buf[buf_len] = 0;
                 INFO("reading end.");
-                if(buf->len == 0)   // 连接关闭
+                if(buf_len == 0)   // 连接关闭
                 {
                     // 将该 fd 移除监视
                     epoll_ctl(epfd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
@@ -85,8 +87,8 @@ int main(int argc, char ** argv)
                 }
                 else
                 {
-                    printf("Got msg = {`%s`} from client = {fd = %d}\n", buf->buf, events[i].data.fd);
-                    write(events[i].data.fd, buf->buf, buf->len);
+                    printf("Got msg = {`%s`} from client = {fd = %d}\n", buf, events[i].data.fd);
+                    write(events[i].data.fd, buf, buf_len);
                 }
             }
             #if 0

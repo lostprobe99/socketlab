@@ -16,6 +16,7 @@ socket编程相关
     7. 添加 `set_broadcast` 函数
     8. 添加 `broadcast` [收](src/broadcast_listen.c)[发](src/broadcast_send.c)的demo
     9. 添加 [`popen` demo](test/popen.c)
+    10. 删除 `buffer_t`
 
 * 2024-9-1
     1. 添加获取网络接口的示例[src/get_itfs](src/get_itfs.c)
