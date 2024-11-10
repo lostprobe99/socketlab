@@ -72,3 +72,52 @@ uint64_t timestamp()
     gettimeofday(&tv, NULL);
     return (uint64_t)tv.tv_sec * 1000 + (uint64_t)tv.tv_usec / 1000;
 }
+
+int hexdump(uint8_t *begin, int s)
+{
+    for(int i = 0; i < s; i++)
+    {
+        if(i % 16 == 0)
+            printf("\n\t");
+        printf("%02x ", begin[i]);
+    }
+    printf("\n");
+    return 0;
+}
+
+int hexdump1(const char * title, uint8_t *begin, int s)
+{
+    printf("%s", title);
+    for(int i = 0; i < s; i++)
+    {
+        if(i % 16 == 0)
+            printf("\n\t");
+        printf("%02x ", begin[i]);
+    }
+    printf("\n");
+    return 0;
+}
+
+uint32_t reverse32(uint32_t x)
+{
+    /*
+     * 第四个字节
+     * x << 24;
+    */
+    /*
+     * 第三个字节
+     * x = (x << 8) & 0x00ff0000;
+    */
+    /*
+    * 第二个字节
+    * x = (x >> 8) & 0x0000ff00;
+    */
+    /*
+     * 第一个字节
+     * x >> 24;
+    */
+    return ((x << 24)
+        | (x << 8) & 0x00ff0000
+        | (x >> 8) & 0x0000ff00
+        | x >> 24);
+}
