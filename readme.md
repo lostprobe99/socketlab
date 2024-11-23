@@ -6,6 +6,9 @@ socket编程相关
 
 ## changelog:
 
+* 2024-11-23
+    1. 将 `arping` 中填充 `arp_msg_t` 的部分拆分为函数 `pack_ether_hdr` 和 `pack_arp_msg`
+
 * 2024-9-1 ~ 2024-11-10
     1. 修复`systemf`中的错误
     2. 添加一个时间戳获取函数`timestamp`
