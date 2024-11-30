@@ -80,7 +80,7 @@
 #define INFO(format, ...)                                                                                         \
     do                                                                                                            \
     {                                                                                                             \
-        fprintf(stderr, ANSI_FMT("Info: %s:%d: " format, ANSI_FG_WHITE) "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
+        fprintf(stderr, ANSI_FMT("Info: %s:%d: " format, ANSI_FG_BLUE) "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
     } while (0)
 
 #define NORM(format, ...)                                     \

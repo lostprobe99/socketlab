@@ -8,7 +8,6 @@ foreach(main IN LISTS sources)
     target_compile_definitions(${target} PUBLIC FILENAME=${fname})
 
     target_link_libraries(${target} netlib)
-    target_link_libraries(${target} buffer)
     target_link_libraries(${target} SimpleSocket)
     target_link_libraries(${target} util)
     # target_link_libraries(${target} minish)

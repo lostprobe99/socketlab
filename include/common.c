@@ -1,6 +1,8 @@
 #include <string.h>
 #include <netdb.h>
 
+#include <sys/time.h> // for struct timeval
+
 #include "common.h"
 #include "debug.h"
 
@@ -97,4 +99,22 @@ int set_broadcast(socket_t fd)
     // 设置广播
     int val = 1;
     return setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &val, sizeof(val));
+}
+
+int set_recv_timeout(socket_t fd, unsigned int sec, unsigned int usec)
+{
+    struct timeval tv = {
+        tv.tv_sec = sec,
+        tv.tv_usec = 0,
+    };
+    return setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+}
+
+int set_send_timeout(socket_t fd, unsigned int sec, unsigned int usec)
+{
+    struct timeval tv = {
+        tv.tv_sec = sec,
+        tv.tv_usec = 0,
+    };
+    return setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
 }

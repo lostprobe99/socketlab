@@ -89,4 +89,7 @@ int get_tcp_info(socket_t fd, struct tcp_info* info);
 /// @return 
 int set_broadcast(socket_t fd);
 
+int set_recv_timeout(socket_t fd, unsigned int sec, unsigned int usec);
+int set_send_timeout(socket_t fd, unsigned int sec, unsigned int usec);
+
 #endif // COMMON_H

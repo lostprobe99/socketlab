@@ -31,6 +31,9 @@ add_definitions(-D${SYSTEM_MACRO})
 
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmacro-prefix-map=${CMAKE_SOURCE_DIR}=")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmacro-prefix-map=${CMAKE_SOURCE_DIR}=")
+
 set(INCLUDE ./include ./lib/simplesocket/include)
 
 include_directories(${INCLUDE})
@@ -44,3 +47,8 @@ add_subdirectory(./include)
 add_subdirectory(./src)
 add_subdirectory(./test)
 add_subdirectory(./lib/simplesocket)
+
+# add_custom_target(clean-all
+#     COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}
+#     COMMENT "remove build dir"
+# )
