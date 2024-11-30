@@ -53,6 +53,8 @@ int main(int argc, char ** argv)
     char *ip_str, *subnet_mask_str, *itf;
     int mask_num = 0;
     arp_msg_t arp_msg = {0};
+    struct sockaddr_in v4 = {0};
+    struct sockaddr_ll mac = {0};
     
     if(argc < 3)
     {
@@ -64,6 +66,9 @@ int main(int argc, char ** argv)
     ip_str = strtok(argv[2], "/");
     subnet_mask_str = strtok(NULL, "/");
     mask_num = atoi(subnet_mask_str);
+
+    get_itf_ip4(itf, &v4);
+    get_itf_mac(itf, &mac);
 
     // 将字符串形式的ip地址转换到字节形式
     struct in_addr ip_addr;
@@ -114,8 +119,21 @@ int main(int argc, char ** argv)
                 perror("recvfrom()");
             else
             {
-                printf(IP_FMT " -> " MAC_FMT "\n", ALL_IP_BYTE(arp_msg.sender_ip), ALL_MAC_BYTE(arp_msg.sender_mac));
-                break;
+                /*
+                 * ARP 回包检测: 
+                 * 1. opcode 为响应
+                 * 2. 目标 ip 为本机
+                 * 3. 目标 mac 为本机
+                 */
+                if(arp_msg.opcode == htons(ARPOP_REPLY)
+                    && memcmp(arp_msg.target_mac, mac.sll_addr, arp_msg.hardware_size) == 0
+                    && v4.sin_addr.s_addr == *(uint32_t *)arp_msg.target_ip)
+                {
+                    printf(IP_FMT " -> " MAC_FMT "\n", ALL_IP_BYTE(arp_msg.sender_ip), ALL_MAC_BYTE(arp_msg.sender_mac));
+                    break;
+                }
+                else
+                    continue;
             }
         }
     }
