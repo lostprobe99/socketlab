@@ -70,7 +70,7 @@ int main() {
     // sock_addr.sll_hatype = htons(ARPHRD_ETHER);
     // sock_addr.sll_halen = ETH_ALEN;
 
-arping(DEV, "192.168.5.4");
+arping1(DEV, "192.168.5.4");
 
     if(bind(sock_fd, (struct sockaddr*)&sock_addr, sizeof(sock_addr)) == -1)
     {

@@ -9,6 +9,7 @@ socket编程相关
 * 2024-11-23 ~ 2024-11-30
     1. 新增 [src/arp_scan.c](src/arp_scan.c) 文件实现 ARP 扫描功能
     2. 在 common.c 中添加设置接收和发送超时的函数
+    3. `arping`函数调整，将创建 `socket` 到关闭 `socket`的部分拆分到 `arping1`，`arping1` 中调用 `arping` 实现独立的 `ARP` 发送流程
 
 * 2024-11-23
     1. 将 `arping` 中填充 `arp_msg_t` 的部分拆分为函数 `pack_ether_hdr` 和 `pack_arp_msg`

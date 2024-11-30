@@ -269,20 +269,8 @@ void pack_arp_msg(arp_msg_t *arp_msg, uint8_t *sender_mac, uint8_t *sender_ip, u
     // memcpy(&arp.target_ip, &sa->sin_addr.s_addr, sizeof(arp.target_ip));
 }
 
-int arping(const char *itf, char * target_ip)
+int arping(int sock, const char *itf, char * target_ip)
 {
-    /**
-     *** __domain
-     * PF_PACKET 二层协议簇
-     *** __type
-     * 指定 PF_PACKET 后，第二参数只能选择 SOCK_RAW 或 SOCK_DGRAM
-     * SOCK_RAW可以自己构造帧头，SOCK_DGRAM不能
-     * 帧头通过 sockaddr_ll 创建
-     *** __protocol
-     * ETH_P_ARP 表示只接收 ARP
-     * ETH_P_ALL 表示接收所有帧
-     */
-    int sock_fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));
     int ifindex = 0;
     arp_msg_t arp = {0};
     struct sockaddr_ll sock_addr;
@@ -292,22 +280,16 @@ int arping(const char *itf, char * target_ip)
 
     inet_pton(AF_INET, target_ip, to_ip);
 
-    if(sock_fd == -1)
-    {
-        perror("socket()");
-        return -1;
-    }
-
     ifindex = if_nametoindex(itf);
-    printf("网卡索引: %d\n", ifindex);
+    // printf("网卡索引: %d\n", ifindex);
 
     // 获取网卡 MAC
     get_itf_mac(itf, &src_hwaddr);
-    printf("网卡MAC: %02X:%02X:%02X:%02X:%02X:%02X\n", ALL_MAC_BYTE((uint8_t)src_hwaddr.sll_addr));
+    // printf("网卡MAC: %02X:%02X:%02X:%02X:%02X:%02X\n", ALL_MAC_BYTE((uint8_t)src_hwaddr.sll_addr));
 
     // 获取网卡 IP
     get_itf_ip4(itf, &src_ip4);
-    printf("网卡 IP: %s\n", inet_ntoa(src_ip4.sin_addr));
+    // printf("网卡 IP: %s\n", inet_ntoa(src_ip4.sin_addr));
 
     pack_arp_msg(&arp, src_hwaddr.sll_addr, (uint8_t *)&src_ip4.sin_addr.s_addr, to_ip);
 
@@ -321,13 +303,44 @@ int arping(const char *itf, char * target_ip)
     memcpy(sock_addr.sll_addr, src_hwaddr.sll_addr, sizeof(sock_addr.sll_addr));
 
     // printf("发送到: %02X:%02X:%02X:%02X:%02X:%02X\n", ALL_MAC_BYTE(sock_addr.sll_addr));
-    hexdump((uint8_t*)&arp, sizeof(arp));
+    // hexdump((uint8_t*)&arp, sizeof(arp));
 
     // 发送 ARP
-    if(sendto(sock_fd, &arp, sizeof(arp), 0, (struct sockaddr*)&sock_addr, sizeof(sock_addr)) == -1)
+    if(sendto(sock, &arp, sizeof(arp), 0, (struct sockaddr*)&sock_addr, sizeof(sock_addr)) == -1)
     {
         perror("sendto()");
         return -4;
+    }
+
+    return 0;
+}
+
+int arping1(const char *itf, char * target_ip)
+{
+    /**
+     *** __domain
+     * PF_PACKET 二层协议簇
+     *** __type
+     * 指定 PF_PACKET 后，第二参数只能选择 SOCK_RAW 或 SOCK_DGRAM
+     * SOCK_RAW可以自己构造帧头，SOCK_DGRAM不能
+     * 帧头通过 sockaddr_ll 创建
+     *** __protocol
+     * ETH_P_ARP 表示只接收 ARP
+     * ETH_P_ALL 表示接收所有帧
+     */
+    int sock_fd = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ARP));
+    int ret = 0;
+
+    if(sock_fd == -1)
+    {
+        perror("socket()");
+        return -1;
+    }
+
+    if( (ret = arping(sock_fd, itf, target_ip)))
+    {
+        close(sock_fd);
+        return ret;
     }
 
     close(sock_fd);

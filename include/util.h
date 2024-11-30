@@ -75,7 +75,8 @@ void pack_ether_hdr(ether_hdr_t *hdr, uint8_t *dest_mac, uint8_t *source_mac, ui
 /// @param target_ip 目标 IP
 void pack_arp_msg(arp_msg_t *arp_msg, uint8_t *sender_mac, uint8_t *sender_ip, uint8_t *target_ip);
 
-int arping(const char *itf, char * target_ip);
+int arping(int sock, const char *itf, char * target_ip);
+int arping1(const char *itf, char * target_ip);
 
 int get_itf_mac(const char *itf, struct sockaddr_ll *addr);
 
