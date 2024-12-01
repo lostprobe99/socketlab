@@ -84,7 +84,7 @@ int main(int argc, char ** argv)
     INFO("subnet mask: %s", inet_ntoa(*(struct in_addr *)&subnet_mask));
 
     if( bind_itf(sock_fd, itf) == -1 )
-        FATAL("无法绑定网卡 %s", itf);
+        DIE("无法绑定网卡 %s", itf);
 
     if( set_recv_timeout(sock_fd, 3, 0) == -1 )
         perror("set_recv_timeout()");

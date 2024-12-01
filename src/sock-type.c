@@ -24,12 +24,12 @@ int main(int argc, char ** argv)
     // 获取 socket 类型
     state = getsockopt(tcp_sock, SOL_SOCKET, SO_TYPE, (void*)&sock_type, &optlen);
     if(state)
-        FATAL("getsockopt");
+        DIE("getsockopt");
     printf("tcp_sock type: %d\n", sock_type);
 
     state = getsockopt(udp_sock, SOL_SOCKET, SO_TYPE, (void*)&sock_type, &optlen);
     if(state)
-        FATAL("getsockopt");
+        DIE("getsockopt");
     printf("udp_sock type: %d\n", sock_type);
 
     return 0;

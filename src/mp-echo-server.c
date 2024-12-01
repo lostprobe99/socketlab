@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 
     int serv_sock = socket(AF_INET, SOCK_STREAM, 0), clnt_sock;
     if (serv_sock == -1)
-        FATAL("socket");
+        DIE("socket");
     sockaddr_in serv_addr, clnt_addr;
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
@@ -38,9 +38,9 @@ int main(int argc, char **argv)
     serv_addr.sin_port = htons(atoi(argv[1]));
 
     if (bind(serv_sock, (sockaddr *)&serv_addr, sizeof(serv_addr)) == -1)
-        FATAL("bind");
+        DIE("bind");
     if (listen(serv_sock, 5) == -1)
-        FATAL("listen");
+        DIE("listen");
 
     pid_t pid;
     char msg[BUF_SIZE];
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
         else if (pid > 0)
             close(clnt_sock);
         else
-            FATAL("fork");
+            DIE("fork");
     }
     close(serv_sock);
     #endif

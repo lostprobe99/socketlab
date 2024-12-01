@@ -31,7 +31,7 @@ int main(int argc, char ** argv)
         timeout.tv_sec = 5;     // 调用 select 后, timeout 的值将会被替换为超时前剩余时间
         timeout.tv_usec = 0;
         result = select(1, &temps, NULL, NULL, &timeout);
-        errif(result == -1, "select() error")
+        DIE_IF(result == -1, "select() error")
         else if(result == 0)
             // 超时
             puts("select: Timeout");

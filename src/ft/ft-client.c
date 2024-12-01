@@ -25,7 +25,7 @@
     do                                                     \
     {                                                      \
         if ((n = recv(server_fd, buf, BUF_SIZE, 0)) == -1) \
-            FATAL("recv() error");                    \
+            DIE("recv() error");                    \
         s = buf;                                           \
         se = buf + n;                                      \
         while (s < se)                                     \
@@ -214,7 +214,7 @@ int cmd_exit(char * args)
     memset(buf, 0, BUF_SIZE);
     buf[0] = EXIT;
     send(server_fd, buf, BUF_SIZE, 0);
-    NORM("`EXIT` send");
+    INFO("`EXIT` send");
     // 清理已分配的资源
     close(server_fd);
     exit(0);

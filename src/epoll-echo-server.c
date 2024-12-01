@@ -33,7 +33,7 @@ int main(int argc, char ** argv)
     errno = 0;
     int sockfd = server(port), clnt_fd;
     Assert(sockfd != -1, "server() error: %s", strerror(errno));
-    NORM("Server starting at %d...", port);
+    INFO("Server starting at %d...", port);
     // select 需要在程序中定义 fd_set, epoll 下为操作系统保存
     int epfd = epoll_create1(0);
     Assert(epfd != -1, "epoll_create1() error: %s", strerror(errno));

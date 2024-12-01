@@ -38,7 +38,7 @@ sockaddr_in make_sockaddr(int af, const char* addr, unsigned short port)
     {
         struct hostent* h = gethostbyname(addr);
         if(!h)
-            FATAL("addr `%s` error", addr);
+            DIE("addr `%s` error", addr);
         // sock_addr.sin_addr.s_addr = (inet_addr(h->h_addr_list[0]));  // 写错力，做个纪念把
         sock_addr.sin_addr = *((struct in_addr*)(h->h_addr_list[0]));
     }

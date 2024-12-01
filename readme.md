@@ -6,6 +6,9 @@ socket编程相关
 
 ## changelog:
 
+* 2024-12-1
+    1. 重命名 `FATAL` 为 `DIE`，以更准确地反映其功能，errif 为 `DIE_IF`
+
 * 2024-11-23 ~ 2024-11-30
     1. 新增 [src/arp_scan.c](src/arp_scan.c) 文件实现 ARP 扫描功能
     2. 在 common.c 中添加设置接收和发送超时的函数

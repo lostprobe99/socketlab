@@ -19,7 +19,7 @@ int main(int argc, char ** argv)
 {
     // 接受广播信息
     socket_t fd = make_socket(AF_INET, SOCK_DGRAM, 0);
-    errif(fd == INVALID_SOCKET, "make socket error");
+    DIE_IF(fd == INVALID_SOCKET, "make socket error");
     set_broadcast(fd);
     sockaddr_in addr = make_sockaddr(AF_INET, 0, 8888);
     // 绑定套接字
@@ -33,7 +33,7 @@ int main(int argc, char ** argv)
         memset(buf, 0, sizeof(buf));
         socklen_t addr_len = sizeof(addr);
         int ret = recvfrom(fd, buf, sizeof(buf), 0, (sockaddr*)&addr, &addr_len);
-        errif(ret == SOCKET_ERROR, "recvfrom error");
+        DIE_IF(ret == SOCKET_ERROR, "recvfrom error");
         hexdump1("recvfrom", buf, ret);
         printf("Received broadcast message: %s\n", buf);
     }

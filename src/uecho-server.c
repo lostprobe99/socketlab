@@ -22,7 +22,7 @@ int main(int argc, char const *argv[])
     // udp server
 
     if(bind(sock, (sockaddr*)&serv_addr, sizeof(serv_addr)) == -1)
-        FATAL("bind");
+        DIE("bind");
 
     char buffer[BUF_SIZE];
     sockaddr_in client_addr;

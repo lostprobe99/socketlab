@@ -48,7 +48,7 @@ int main(int argc, char ** argv)
         sockaddr_in clnt_addr;
         clnt_fd = accept(fd, (sockaddr*)&clnt_addr, &clnt_addr_size);
         if(clnt_fd == -1)
-            FATAL("accept() error");
+            DIE("accept() error");
         memset(s_buf, 0, 64);
         while(recv(clnt_fd, s_buf, 64, 0) > 0)
         {
@@ -83,10 +83,10 @@ int main(int argc, char ** argv)
             INFO("parent process exit\n");
         }
         else
-            FATAL("fork() error 2");
+            DIE("fork() error 2");
     }
     else
-        FATAL("fork() error 1");
+        DIE("fork() error 1");
 
     return 0;
 }

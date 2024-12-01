@@ -36,6 +36,7 @@
 
 #define RED(format, ...) ANSI_FMT(format, ANSI_FG_RED), ##__VA_ARGS__
 #define GREEN(format, ...) ANSI_FMT(format, ANSI_FG_GREEN), ##__VA_ARGS__
+#define BLUE(format, ...) ANSI_FMT(format, ANSI_FG_BLUE), ##__VA_ARGS__
 
 #define EXPECT(x1, x2)                                                                  \
     do                                                                                  \
@@ -58,41 +59,34 @@
         }                                                              \
     } while (0)
 
-#define FATAL(format, ...)                                                                                  \
+#define DIE(format, ...)                                                                                  \
     do                                                                                                           \
     {                                                                                                            \
-        fprintf(stderr, ANSI_FMT("Fatal: %s:%d: " format, ANSI_BG_RED) "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
+        fprintf(stderr, RED("Fatal: %s:%d: " format) "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
         exit(1);                                                                                                 \
     } while (0)
 
-#define ERROR(format, ...)                                                                                       \
-    do                                                                                                           \
-    {                                                                                                            \
-        fprintf(stderr, ANSI_FMT("Error: %s:%d: " format, ANSI_BG_RED) "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
-    } while (0)
-
-#define WARN(format, ...)                                                                                          \
-    do                                                                                                             \
-    {                                                                                                              \
-        fprintf(stderr, ANSI_FMT("Warning: %s:%d: " format, ANSI_FG_RED) "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
-    } while (0)
-
-#define INFO(format, ...)                                                                                         \
-    do                                                                                                            \
-    {                                                                                                             \
-        fprintf(stderr, ANSI_FMT("Info: %s:%d: " format, ANSI_FG_BLUE) "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
-    } while (0)
-
-#define NORM(format, ...)                                     \
-    do                                                        \
-    {                                                         \
-        fprintf(stdout, "Norm: " format "\n", ##__VA_ARGS__); \
-        fflush(stdout);                                       \
-    } while (0)
-
-#define errif(cond, str)    \
+#define DIE_IF(cond, str)    \
     if (cond)               \
     {                       \
         perror(str);        \
         exit(EXIT_FAILURE); \
     }
+
+#define ERROR(format, ...)                                                                                       \
+    do                                                                                                           \
+    {                                                                                                            \
+        fprintf(stderr, RED("Error: %s:%d: " format) "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
+    } while (0)
+
+#define WARN(format, ...)                                                                                          \
+    do                                                                                                             \
+    {                                                                                                              \
+        fprintf(stderr, RED("Warning: %s:%d: " format) "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
+    } while (0)
+
+#define INFO(format, ...)                                                                                         \
+    do                                                                                                            \
+    {                                                                                                             \
+        fprintf(stderr, BLUE("Info: %s:%d: " format) "\n", __FILE__, __LINE__, ##__VA_ARGS__); \
+    } while (0)
