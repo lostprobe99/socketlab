@@ -6,6 +6,12 @@ socket编程相关
 
 ## changelog:
 
+* 2024-12-8
+    1. debug 宏调整，优化实现和打印格式
+    2. 将 `arp_scan` 中的 `bind_itf` 函数拆分到 `util` 中
+    3. `util` 中添加 `mac_aton` 和 `mac_ntoa` 用于 MAC 格式转换
+    4. 添加 [src/send_ether.c](src/send_ether.c)，实现以太网帧的打包发送
+
 * 2024-12-1
     1. 重命名 `FATAL` 为 `DIE`，以更准确地反映其功能，errif 为 `DIE_IF`
 

@@ -85,6 +85,18 @@ int get_itf_ip4(const char *itf, struct sockaddr_in *addr);
 
 int get_itf_subnet_mask(const char *itf, struct sockaddr_in *addr);
 
+/// @brief  将字符串格式的 MAC 转换为字节数组，分隔符为 ':'
+/// @param s 
+/// @param mac 字节数组，最小为 6
+/// @retval -1 失败
+/// @retval  0 成功
+int mac_aton(const char *s, uint8_t *mac);
+
+/// @brief 将字节数组格式的 MAC 转换为字符串格式，分隔符为 ':'
+char* mac_ntoa(uint8_t *mac);
+
+/// @brief 绑定 socket 和 网卡
+/// @return bind() 函数的返回值
 int bind_itf(int sock_fd, const char *itf);
 
 // 平台无关

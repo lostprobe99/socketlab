@@ -226,6 +226,23 @@ int get_itf_subnet_mask(const char *itf, struct sockaddr_in *addr)
     return 0;
 }
 
+int mac_aton(const char *s, uint8_t *mac)
+{
+    /*
+     * %hhx: %x - 十六进制
+     * hh: char 或 unsigned char
+    */
+    int ret = sscanf(s, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", mac, mac + 1, mac + 2, mac + 3, mac + 4, mac + 5);
+    return ret == 6 ? 0 : -1; // 不是 6 个则返回 -1
+}
+
+char* mac_ntoa(uint8_t *mac)
+{
+    static char s[32] = {0};
+    snprintf(s, sizeof(s), "%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    return s;
+}
+
 int bind_itf(int sock_fd, const char *itf)
 {
     struct sockaddr_ll sock_addr = {0};
