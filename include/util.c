@@ -226,6 +226,18 @@ int get_itf_subnet_mask(const char *itf, struct sockaddr_in *addr)
     return 0;
 }
 
+int bind_itf(int sock_fd, const char *itf)
+{
+    struct sockaddr_ll sock_addr = {0};
+    sock_addr.sll_family = AF_PACKET;
+    sock_addr.sll_ifindex = if_nametoindex(itf);
+
+    if( sock_addr.sll_ifindex == -1 )
+        return -1;
+
+    return bind(sock_fd, (struct sockaddr*)&sock_addr, sizeof(sock_addr));
+}
+
 void pack_ether_hdr(ether_hdr_t *hdr, uint8_t *dest_mac, uint8_t *source_mac, uint16_t proto_type)
 {
     memset(hdr, 0, sizeof(ether_hdr_t));

@@ -32,18 +32,6 @@ uint32_t create_mask(uint32_t n)
     return ~((1U << (32 - n)) - 1);
 }
 
-int bind_itf(int sock_fd, const char *itf)
-{
-    struct sockaddr_ll sock_addr = {0};
-    sock_addr.sll_family = AF_PACKET;
-    sock_addr.sll_ifindex = if_nametoindex(itf);
-
-    if( sock_addr.sll_ifindex == -1 )
-        return -1;
-
-    return bind(sock_fd, (struct sockaddr*)&sock_addr, sizeof(sock_addr));
-}
-
 /*
  * arp_scan eth0 192.168.5.4/24
  */

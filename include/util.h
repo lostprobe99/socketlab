@@ -24,6 +24,7 @@
 
 #define ALL_MAC_BYTE(x) x[0], x[1], x[2], x[3], x[4], x[5]
 #define ALL_IP_BYTE(x) x[0], x[1], x[2], x[3]
+#define __packed __attribute__((packed))
 
 typedef struct __attribute__((packed)) _ethernet_hdr_
 {
@@ -83,6 +84,8 @@ int get_itf_mac(const char *itf, struct sockaddr_ll *addr);
 int get_itf_ip4(const char *itf, struct sockaddr_in *addr);
 
 int get_itf_subnet_mask(const char *itf, struct sockaddr_in *addr);
+
+int bind_itf(int sock_fd, const char *itf);
 
 // 平台无关
 
