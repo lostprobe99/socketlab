@@ -13,6 +13,7 @@ socket编程相关
     4. 将 `ARP` 部分从 `util` 中拆分到 `arp` 中
     5. 将 `ether` 部分从 `util` 中拆分到 `ether` 中
     6. 移除 `util` 中的 `systemf`, 添加 `os_exec`
+    7. 添加 `exec` 函数族的示例和解释
 
 * 2024-12-8
     1. debug 宏调整，优化实现和打印格式
