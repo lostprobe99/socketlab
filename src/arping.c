@@ -22,7 +22,7 @@
 #include <linux/if_packet.h>    // for struct sockaddr_ll
 #include <linux/if_arp.h>
 
-#include "util.h"
+#include "arp.h"
 
 #define DEV "eth0"
 

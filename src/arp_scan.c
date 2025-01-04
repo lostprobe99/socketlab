@@ -22,7 +22,7 @@
 
 #include "common.h"
 #include "debug.h"
-#include "util.h"
+#include "arp.h"
 
 #define MAC_FMT "%02X:%02X:%02X:%02X:%02X:%02X"
 #define IP_FMT "%d.%d.%d.%d"
