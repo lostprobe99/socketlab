@@ -9,6 +9,11 @@
 #define ARP_H
 
 #include "util.h"
+#include "ether.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // ARP包结构
 // 字段顺序不可更改
@@ -41,5 +46,9 @@ void pack_arp_msg(arp_msg_t *arp_msg, uint8_t *sender_mac, uint8_t *sender_ip, u
 
 int arping(int sock, const char *itf, char * target_ip);
 int arping1(const char *itf, char * target_ip);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ARP_H

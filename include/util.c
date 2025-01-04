@@ -255,11 +255,3 @@ int bind_itf(int sock_fd, const char *itf)
 
     return bind(sock_fd, (struct sockaddr*)&sock_addr, sizeof(sock_addr));
 }
-
-void pack_ether_hdr(ether_hdr_t *hdr, uint8_t *dest_mac, uint8_t *source_mac, uint16_t proto_type)
-{
-    memset(hdr, 0, sizeof(ether_hdr_t));
-    memcpy(hdr->dest_mac, dest_mac, sizeof(hdr->dest_mac));
-    memcpy(hdr->source_mac, source_mac, sizeof(hdr->source_mac));
-    hdr->proto_type = htons(proto_type);
-}

@@ -11,6 +11,7 @@ socket编程相关
     2. 删除 `buffer_t`
     3. [src/arp_scan.c](src/arp_scan.c) 添加 `ARP` 报文过滤函数
     4. 将 `ARP` 部分从 `util` 中拆分到 `arp` 中
+    5. 将 `ether` 部分从 `util` 中拆分到 `ether` 中
 
 * 2024-12-8
     1. debug 宏调整，优化实现和打印格式

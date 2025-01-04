@@ -26,31 +26,11 @@
 #define ALL_IP_BYTE(x) x[0], x[1], x[2], x[3]
 #define __packed __attribute__((packed))
 
-typedef struct __packed _ethernet_hdr_
-{
-    /* 以太网头 */
-    /* +------+------+------+ */
-    /* | 目地AC | 源MAC | 协议类型 | */
-    /* +------+------+------+ */
-    /* | 6字节  | 6字节  | 2字节  | */
-    /* +------+------+------+ */
-    uint8_t dest_mac[6];    /* 目的MAC */
-    uint8_t source_mac[6];     /* 源MAC */
-    uint16_t proto_type;    /* 协议类型 */
-} ether_hdr_t;
-
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/// @brief 构建以太网头
-/// @param hdr 以太网头
-/// @param dest_mac 目的 MAC
-/// @param source_mac 源 MAC
-/// @param proto_type 协议类型
-void pack_ether_hdr(ether_hdr_t *hdr, uint8_t *dest_mac, uint8_t *source_mac, uint16_t proto_type);
 
 int get_itf_mac(const char *itf, struct sockaddr_ll *addr);
 
