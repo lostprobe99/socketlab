@@ -62,6 +62,10 @@ typedef struct __attribute__((packed)) _arp_msg_
 }arp_msg_t;
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /// @brief 构建以太网头
 /// @param hdr 以太网头
 /// @param dest_mac 目的 MAC
@@ -120,5 +124,9 @@ int hexdump1(const char * title, uint8_t *begin, int s);
 /// @brief 逐位反转
 /// @return 反转后的结果
 uint32_t reverse32(uint32_t x);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // UTIL_H

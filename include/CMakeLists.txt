@@ -7,6 +7,3 @@ endif()
 
 add_library(minish SHARED minish.c)
 target_link_libraries(minish PRIVATE readline)
-
-add_library(buffer SHARED buffer.c)
-target_link_libraries(buffer PRIVATE util)

@@ -48,6 +48,10 @@ typedef int socket_t;
 #endif
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 socket_t make_socket(int af, int type, int protocol);
 
 /// @brief 创建 sockaddr_in 结构体
@@ -91,5 +95,9 @@ int set_broadcast(socket_t fd);
 
 int set_recv_timeout(socket_t fd, unsigned int sec, unsigned int usec);
 int set_send_timeout(socket_t fd, unsigned int sec, unsigned int usec);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // COMMON_H

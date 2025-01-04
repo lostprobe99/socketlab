@@ -6,6 +6,10 @@ socket编程相关
 
 ## changelog:
 
+* 2025-1-4
+    1. 添加 `extern C`, 适配 c++
+    2. 删除 `buffer_t`
+
 * 2024-12-8
     1. debug 宏调整，优化实现和打印格式
     2. 将 `arp_scan` 中的 `bind_itf` 函数拆分到 `util` 中

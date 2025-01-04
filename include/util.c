@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdarg.h>
 #include <unistd.h>
 #include <time.h>
@@ -48,7 +49,7 @@ int systemf(const char * fmt, ...)
         perror("Error estimating buffer size");
         return -1;
     }
-    char * cmd = malloc(len + 1);
+    char * cmd = (char *)malloc(len + 1);
     if(!cmd)
     {
         va_end(args);
