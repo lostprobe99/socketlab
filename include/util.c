@@ -10,9 +10,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <errno.h>
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
+#include <sys/wait.h>
 
 #include "util.h"
 
@@ -37,34 +39,57 @@ int round_two(int x)
     return last << 1;
 }
 
-int systemf(const char * fmt, ...)
+int os_exec(char *cmd, ...)
 {
-    int res = 0;
-    va_list args;
-    va_start(args, fmt);
-    int len = vsnprintf(NULL, 0, fmt, args);
-    if(len <= 0)
+    char *args[16] = {NULL};
+    char *arg = NULL;
+    int i = 0, status = 0;
+    va_list va;
+    pid_t pid = -1, ret;
+
+    // 解析参数
+    args[0] = cmd;
+    va_start(va, cmd);
+    i = 1;
+    while (i < 16)
     {
-        va_end(args);
-        perror("Error estimating buffer size");
+        arg = va_arg(va, char *);
+        if (arg == NULL)
+            break;
+        args[i] = arg;
+        i++;
+    }
+    if (arg != NULL)
+    {
+        printf("Error: too many arguments\n");
+        va_end(va);
         return -1;
     }
-    char * cmd = (char *)malloc(len + 1);
-    if(!cmd)
+    va_end(va);
+
+    pid = fork();
+    if (pid == 0)
     {
-        va_end(args);
-        perror("Memory alloction failed");
-        return -1;
+        if (execvp(args[0], &args[1]) == -1)
+            _exit(127);
+    }
+    else if (pid > 0)
+    {
+        while ((ret = waitpid(pid, &status, 0)) == -1)
+        {
+            if (errno == EINTR)
+            {
+                status = -1;
+                break;
+            }
+        }
+    }
+    else
+    {
+        status = -1;
     }
 
-    va_start(args, fmt);
-    vsnprintf(cmd, len + 1, fmt, args);
-    va_end(args);
-
-    res = system(cmd);
-    free(cmd);
-
-    return res;
+    return status;
 }
 
 uint64_t timestamp()
@@ -76,9 +101,9 @@ uint64_t timestamp()
 
 int hexdump(uint8_t *begin, int s)
 {
-    for(int i = 0; i < s; i++)
+    for (int i = 0; i < s; i++)
     {
-        if(i % 16 == 0)
+        if (i % 16 == 0)
             printf("\n\t");
         printf("%02x ", begin[i]);
     }
@@ -86,12 +111,12 @@ int hexdump(uint8_t *begin, int s)
     return 0;
 }
 
-int hexdump1(const char * title, uint8_t *begin, int s)
+int hexdump1(const char *title, uint8_t *begin, int s)
 {
     printf("%s", title);
-    for(int i = 0; i < s; i++)
+    for (int i = 0; i < s; i++)
     {
-        if(i % 16 == 0)
+        if (i % 16 == 0)
             printf("\n\t");
         printf("%02x ", begin[i]);
     }
@@ -104,19 +129,19 @@ uint32_t reverse32(uint32_t x)
     /*
      * 第四个字节
      * x << 24;
-    */
+     */
     /*
      * 第三个字节
      * x = (x << 8) & 0x00ff0000;
-    */
+     */
     /*
-    * 第二个字节
-    * x = (x >> 8) & 0x0000ff00;
-    */
+     * 第二个字节
+     * x = (x >> 8) & 0x0000ff00;
+     */
     /*
      * 第一个字节
      * x >> 24;
-    */
+     */
     return ((x << 24)
         | (x << 8) & 0x00ff0000
         | (x >> 8) & 0x0000ff00
@@ -129,14 +154,14 @@ int get_itf_mac(const char *itf, struct sockaddr_ll *addr)
     int sock_fd = -1;
     struct sockaddr_ll *sa_ll = addr;
 
-    if(addr == NULL)
+    if (addr == NULL)
     {
         return -1;
     }
 
     // a socket, any type is ok
     sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if(sock_fd == -1)
+    if (sock_fd == -1)
     {
         perror("socket()");
         return -2;
@@ -144,9 +169,9 @@ int get_itf_mac(const char *itf, struct sockaddr_ll *addr)
 
     memset(&ifr, 0, sizeof(ifr));
     strncpy(ifr.ifr_name, itf, sizeof(ifr.ifr_name));
-    
+
     // 获取网卡 MAC
-    if(ioctl(sock_fd, SIOCGIFHWADDR, &ifr) == -1)
+    if (ioctl(sock_fd, SIOCGIFHWADDR, &ifr) == -1)
     {
         close(sock_fd);
         perror("SIOCGIFHWADDR");
@@ -166,13 +191,13 @@ int get_itf_ip4(const char *itf, struct sockaddr_in *addr)
     int sock_fd = -1;
     struct sockaddr_in *sa_ll = addr;
 
-    if(addr == NULL)
+    if (addr == NULL)
     {
         return -1;
     }
 
     sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if(sock_fd == -1)
+    if (sock_fd == -1)
     {
         perror("socket()");
         return -2;
@@ -180,9 +205,9 @@ int get_itf_ip4(const char *itf, struct sockaddr_in *addr)
 
     memset(&ifr, 0, sizeof(ifr));
     strncpy(ifr.ifr_name, itf, sizeof(ifr.ifr_name));
-    
+
     // 获取网卡 IP
-    if(ioctl(sock_fd, SIOCGIFADDR, &ifr) == -1)
+    if (ioctl(sock_fd, SIOCGIFADDR, &ifr) == -1)
     {
         close(sock_fd);
         perror("SIOCGIFADDR");
@@ -199,13 +224,13 @@ int get_itf_subnet_mask(const char *itf, struct sockaddr_in *addr)
     struct ifreq ifr;
     int sock_fd = -1;
 
-    if(addr == NULL)
+    if (addr == NULL)
     {
         return -1;
     }
 
     sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if(sock_fd == -1)
+    if (sock_fd == -1)
     {
         perror("socket()");
         return -2;
@@ -213,9 +238,9 @@ int get_itf_subnet_mask(const char *itf, struct sockaddr_in *addr)
 
     memset(&ifr, 0, sizeof(ifr));
     strncpy(ifr.ifr_name, itf, sizeof(ifr.ifr_name));
-    
+
     // 获取网卡 IP
-    if(ioctl(sock_fd, SIOCGIFNETMASK, &ifr) == -1)
+    if (ioctl(sock_fd, SIOCGIFNETMASK, &ifr) == -1)
     {
         close(sock_fd);
         perror("SIOCGIFNETMASK");
@@ -232,12 +257,12 @@ int mac_aton(const char *s, uint8_t *mac)
     /*
      * %hhx: %x - 十六进制
      * hh: char 或 unsigned char
-    */
+     */
     int ret = sscanf(s, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", mac, mac + 1, mac + 2, mac + 3, mac + 4, mac + 5);
     return ret == 6 ? 0 : -1; // 不是 6 个则返回 -1
 }
 
-char* mac_ntoa(uint8_t *mac)
+char *mac_ntoa(uint8_t *mac)
 {
     static char s[32] = {0};
     snprintf(s, sizeof(s), "%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
@@ -250,8 +275,8 @@ int bind_itf(int sock_fd, const char *itf)
     sock_addr.sll_family = AF_PACKET;
     sock_addr.sll_ifindex = if_nametoindex(itf);
 
-    if( sock_addr.sll_ifindex == -1 )
+    if (sock_addr.sll_ifindex == -1)
         return -1;
 
-    return bind(sock_fd, (struct sockaddr*)&sock_addr, sizeof(sock_addr));
+    return bind(sock_fd, (struct sockaddr *)&sock_addr, sizeof(sock_addr));
 }

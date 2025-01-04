@@ -26,8 +26,6 @@
 #define ALL_IP_BYTE(x) x[0], x[1], x[2], x[3]
 #define __packed __attribute__((packed))
 
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -52,18 +50,19 @@ char* mac_ntoa(uint8_t *mac);
 /// @return bind() 函数的返回值
 int bind_itf(int sock_fd, const char *itf);
 
+/// @brief 执行 cmd 的命令或文件
+/// @param cmd 要执行的文件名, 若未指定路径, 则从 PATH 中寻找
+/// @param ... 传递给 cmd 的参数, 以 NULL 结尾
+/// @retval 0 成功
+/// @retval 其他 失败
+int os_exec(char *cmd, ...);
+
 // 平台无关
 
 /// @brief 返回大于 x 的最小 2 的幂
 /// @param x 
 /// @return 
 int round_two(int x);
-
-/// @brief 可接收格式化字符串的system()函数
-/// @param fmt 格式字符串
-/// @param ... 格式字符串的参数
-/// @return system()函数的返回值
-int systemf(const char * fmt, ...);
 
 /// @brief 打印 begin ~ begin + s 的十六进制数据
 int hexdump(uint8_t *begin, int s);
