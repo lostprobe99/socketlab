@@ -1,5 +1,5 @@
 /**
- * broadcast_arping.c
+ * arp_scan.c
  *
  * @author : lostprobe
  * @date   : 2024/11/10 15:04
@@ -30,6 +30,30 @@
 uint32_t create_mask(uint32_t n)
 {
     return ~((1U << (32 - n)) - 1);
+}
+
+int arp_filter_target_mac(arp_msg_t* arp_msg, void* params)
+{
+    uint8_t* tmac = params;
+    return memcmp(arp_msg->target_mac, tmac, arp_msg->hardware_size) == 0;
+}
+
+int arp_filter_target_ip(arp_msg_t* arp_msg, void* params)
+{
+    uint32_t tip = *(uint32_t *)arp_msg->target_ip;
+    return (*(uint32_t *)arp_msg->target_ip) == tip;
+}
+
+int arp_filter_sender_ip(arp_msg_t* arp_msg, void* params)
+{
+    return (*(uint32_t *)arp_msg->sender_ip) == *(uint32_t *)params;
+}
+
+typedef int (*filter_t)(arp_msg_t*, void*);
+int arp_filter(arp_msg_t* arp_msg, filter_t filter, void* params)
+{
+    int ret = filter(arp_msg, params);
+    return ret;
 }
 
 /*
@@ -66,10 +90,10 @@ int main(int argc, char ** argv)
     // 转换子网掩码
     uint32_t subnet_mask = htonl(create_mask(mask_num));
 
-    INFO("socket: %d", sock_fd);
-    INFO("itf: %s", itf);
-    INFO("ip: %s", ip_str);
-    INFO("subnet mask: %s", inet_ntoa(*(struct in_addr *)&subnet_mask));
+    INFO("socket: %d\n", sock_fd);
+    INFO("itf: %s\n", itf);
+    INFO("ip: %s\n", ip_str);
+    INFO("subnet mask: %s\n", inet_ntoa(*(struct in_addr *)&subnet_mask));
 
     if( bind_itf(sock_fd, itf) == -1 )
         DIE("无法绑定网卡 %s", itf);
@@ -80,8 +104,8 @@ int main(int argc, char ** argv)
     // 使用ip和子网掩码计算网络段和主机段
     uint32_t network_ip = src_ip & subnet_mask;
     uint32_t host_num = ~subnet_mask;
-    INFO("sub network: %s", inet_ntoa(*(struct in_addr *)&network_ip));
-    INFO("host num: %u", htonl(host_num));
+    INFO("sub network: %s\n", inet_ntoa(*(struct in_addr *)&network_ip));
+    INFO("host num: %u\n", htonl(host_num));
 
     // 计算广播地址
     uint32_t broadcast_ip = network_ip | (~subnet_mask);
@@ -114,8 +138,10 @@ int main(int argc, char ** argv)
                  * 3. 目标 mac 为本机
                  */
                 if(arp_msg.opcode == htons(ARPOP_REPLY)
-                    && memcmp(arp_msg.target_mac, mac.sll_addr, arp_msg.hardware_size) == 0
-                    && v4.sin_addr.s_addr == *(uint32_t *)arp_msg.target_ip)
+                    && arp_filter(&arp_msg, arp_filter_target_mac, mac.sll_addr)
+                    && arp_filter(&arp_msg, arp_filter_target_ip, &v4.sin_addr.s_addr)
+                    && arp_filter(&arp_msg, arp_filter_sender_ip, &target_ip)
+                    )
                 {
                     printf(IP_FMT " -> " MAC_FMT "\n", ALL_IP_BYTE(arp_msg.sender_ip), ALL_MAC_BYTE(arp_msg.sender_mac));
                     break;
