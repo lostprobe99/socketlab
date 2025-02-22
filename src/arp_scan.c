@@ -32,28 +32,26 @@ uint32_t create_mask(uint32_t n)
     return ~((1U << (32 - n)) - 1);
 }
 
-int arp_filter_target_mac(arp_msg_t* arp_msg, void* params)
+int match_ip(uint8_t* ip1, uint8_t* ip2)
 {
-    uint8_t* tmac = params;
-    return memcmp(arp_msg->target_mac, tmac, arp_msg->hardware_size) == 0;
+    return memcmp(ip1, ip2, 4) == 0;
 }
 
-int arp_filter_target_ip(arp_msg_t* arp_msg, void* params)
+int match_mac(uint8_t* mac1, uint8_t* mac2)
 {
-    uint32_t tip = *(uint32_t *)arp_msg->target_ip;
-    return (*(uint32_t *)arp_msg->target_ip) == tip;
+    return memcmp(mac1, mac2, 6) == 0;
 }
 
-int arp_filter_sender_ip(arp_msg_t* arp_msg, void* params)
+uint8_t* saddr_to_bytes(struct sockaddr_in *addr, uint8_t* bytes)
 {
-    return (*(uint32_t *)arp_msg->sender_ip) == *(uint32_t *)params;
+    memcpy(bytes, &addr->sin_addr.s_addr, sizeof(addr->sin_addr.s_addr));
+    return bytes;
 }
 
-typedef int (*filter_t)(arp_msg_t*, void*);
-int arp_filter(arp_msg_t* arp_msg, filter_t filter, void* params)
+uint8_t* slladdr_to_bytes(struct sockaddr_ll *addr, uint8_t* bytes)
 {
-    int ret = filter(arp_msg, params);
-    return ret;
+    memcpy(bytes, &addr->sll_addr, sizeof(addr->sll_addr));
+    return bytes;
 }
 
 /*
@@ -67,6 +65,7 @@ int main(int argc, char ** argv)
     arp_msg_t arp_msg = {0};
     struct sockaddr_in v4 = {0};
     struct sockaddr_ll mac = {0};
+    uint8_t bytes[16] = {0};
     
     if(argc < 3)
     {
@@ -138,9 +137,9 @@ int main(int argc, char ** argv)
                  * 3. 目标 mac 为本机
                  */
                 if(arp_msg.opcode == htons(ARPOP_REPLY)
-                    && arp_filter(&arp_msg, arp_filter_target_mac, mac.sll_addr)
-                    && arp_filter(&arp_msg, arp_filter_target_ip, &v4.sin_addr.s_addr)
-                    && arp_filter(&arp_msg, arp_filter_sender_ip, &target_ip)
+                    && match_ip(arp_msg.target_ip, saddr_to_bytes(&v4, bytes))
+                    && match_mac(arp_msg.target_mac, slladdr_to_bytes(&mac, bytes))
+                    && match_ip(arp_msg.sender_ip, (uint8_t*)&target_ip)
                     )
                 {
                     printf(IP_FMT " -> " MAC_FMT "\n", ALL_IP_BYTE(arp_msg.sender_ip), ALL_MAC_BYTE(arp_msg.sender_mac));

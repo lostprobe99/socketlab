@@ -8,6 +8,7 @@ socket编程相关
 
 * 2025-02-22
     1. 删除`send_ether_frame`中的未使用参数
+    2. 修改[src/arp_scan.c](src/arp_scan.c)中的 `ARP` 包过滤逻辑
 
 * 2025-1-4
     1. 添加 `extern C`, 适配 c++
