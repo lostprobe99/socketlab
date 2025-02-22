@@ -6,6 +6,9 @@ socket编程相关
 
 ## changelog:
 
+* 2025-02-22
+    1. 删除`send_ether_frame`中的未使用参数
+
 * 2025-1-4
     1. 添加 `extern C`, 适配 c++
     2. 删除 `buffer_t`

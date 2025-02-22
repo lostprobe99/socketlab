@@ -41,7 +41,7 @@ void pack_ether_hdr(ether_hdr_t *hdr, uint8_t *dest_mac, uint8_t *source_mac, ui
 
 int pack_ether_frame(ether_frame_t *frame, uint8_t *dest_mac, uint8_t *source_mac, uint16_t proto_type, uint8_t *data, int data_len);
 
-int send_ether_frame(int sock_fd, const char *itf, uint8_t *dest_mac, uint8_t *source_mac, uint16_t proto_type, uint8_t *data, int data_len);
+int send_ether_frame(int sock_fd, uint8_t *dest_mac, uint8_t *source_mac, uint16_t proto_type, uint8_t *data, int data_len);
 
 
 #ifdef __cplusplus

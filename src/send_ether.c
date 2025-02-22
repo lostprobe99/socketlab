@@ -40,7 +40,7 @@ int main(int argc, char ** argv)
     DIE_IF(bind_itf(sock_fd, itf) < 0, "bind");
     DIE_IF(get_itf_mac(itf, &addr) < 0, "ioctl");
     INFO("Send [%s] to [%s]\n", data, s_mac);
-    DIE_IF(send_ether_frame(sock_fd, itf, dest_mac, addr.sll_addr, proto, data, strlen(data)) < 0, "sendto");
+    DIE_IF(send_ether_frame(sock_fd, dest_mac, addr.sll_addr, proto, data, strlen(data)) < 0, "sendto");
 
     close(sock_fd);
     return 0;
