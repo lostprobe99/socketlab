@@ -15,7 +15,6 @@
 
 #include "common.h"
 #include "debug.h"
-#include "buffer.h"
 
 #define MAX_EVENT 1024
 #define BUF_SIZE 1024
