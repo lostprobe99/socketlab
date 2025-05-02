@@ -7,6 +7,7 @@ socket编程相关
 ## changelog:
 * 2025-05-02
     1. 添加 `simple_log`
+    2. 添加 `netlink` 获取 `IP` 地址的示例
 
 * 2025-02-22
     1. 删除`send_ether_frame`中的未使用参数

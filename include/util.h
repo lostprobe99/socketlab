@@ -64,7 +64,7 @@ int os_exec(char *cmd, ...);
 /// @return 
 int round_two(int x);
 
-/// @brief 打印 begin ~ begin + s 的十六进制数据
+/// @brief 使用十六进制打印 begin ~ begin + s 之间的数据
 int hexdump(uint8_t *begin, int s);
 
 int hexdump1(const char * title, uint8_t *begin, int s);
