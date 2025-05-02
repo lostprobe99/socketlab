@@ -13,20 +13,21 @@
 #include <unistd.h>
 #include "simplesocket/InetAddr.h"
 #include "simplesocket/Socket.h"
+#include "simplesocket/TcpSocket.h"
 
 int main(int argc, char ** argv)
 {
-    Socket serv_sock = Socket::open();
+    TcpSocket serv_sock;
+    serv_sock.open("localhost", 9990);
     std::cout << serv_sock << '\n';
     InetAddr addr("localhost", 9990);
     std::cout << addr << '\n';
 
-    serv_sock.bind(addr);
     serv_sock.listen();
 
     std::cout << "Server starting at " << addr.port() << "\n";
 
-    Socket clnt_sock;
+    TcpSocket clnt_sock;
     int clnt_fd;
     InetAddr clnt_addr;
     std::vector<char> buffer;
