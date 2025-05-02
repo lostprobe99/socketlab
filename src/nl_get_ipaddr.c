@@ -175,6 +175,7 @@ try_recv:
     log_info("recvmsg: %zd bytes\n", n);
     log_debug_hexdump("", (uint8_t *)buf, n);
 
+    // 提取 nlmsghdr
     nh = (struct nlmsghdr *)buf;
     while(nh->nlmsg_type != NLMSG_DONE)
     {
@@ -188,9 +189,12 @@ try_recv:
                 log_info("NLMSG_ERROR: error %d\n", err->error);
                 break;
             }
+
+            // 提取 ifaddrmsg
             ifa = NLMSG_DATA(nh);
             dump_ifaddrmsg(*ifa);
 
+            // 解析 rtattr
             struct rtattr *rta = IFA_RTA(ifa);
             int len = IFA_PAYLOAD(nh);
 
