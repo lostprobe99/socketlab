@@ -176,15 +176,10 @@ try_recv:
     log_debug_hexdump("", (uint8_t *)buf, n);
 
     nh = (struct nlmsghdr *)buf;
-    while(nh->nlmsg_type  != NLMSG_DONE)
+    while(nh->nlmsg_type != NLMSG_DONE)
     {
         for (; NLMSG_OK(nh, n); nh = NLMSG_NEXT(nh, n)) {
             dump_nlmsghdr(*nh);
-            if(nh->nlmsg_type == NLMSG_DONE) {
-                // NLMSG_DONE 表示消息结束
-                log_info("NLMSG_DONE\n");
-                break;
-            }
             if(nh->nlmsg_type == NLMSG_ERROR) {
                 // NLMSG_ERROR 表示错误
                 log_info("NLMSG_ERROR\n");
@@ -210,6 +205,10 @@ try_recv:
             }
         }
         goto try_recv;
+    }
+    if(nh->nlmsg_type == NLMSG_DONE) {
+        // NLMSG_DONE 表示消息结束
+        log_info("NLMSG_DONE\n");
     }
 
     return 0;
