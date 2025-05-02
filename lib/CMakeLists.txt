@@ -1,1 +1,2 @@
 add_subdirectory(simplesocket)
+add_subdirectory(simple_log)

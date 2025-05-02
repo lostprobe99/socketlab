@@ -2,6 +2,7 @@
 .cache
 build
 *.tmp
+*.log
 
 # doxygen 生成的目录
 html

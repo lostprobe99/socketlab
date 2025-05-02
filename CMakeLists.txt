@@ -34,7 +34,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmacro-prefix-map=${CMAKE_SOURCE_DIR}=")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmacro-prefix-map=${CMAKE_SOURCE_DIR}=")
 
-set(INCLUDE ./include ./lib/simplesocket/include)
+set(INCLUDE ./include ./lib/simplesocket/include ./lib/simple_log)
 
 include_directories(${INCLUDE})
 
@@ -46,7 +46,7 @@ link_libraries(m)   # 连接 math 库
 add_subdirectory(./include)
 add_subdirectory(./src)
 add_subdirectory(./test)
-add_subdirectory(./lib/simplesocket)
+add_subdirectory(./lib)
 
 # add_custom_target(clean-all
 #     COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}
