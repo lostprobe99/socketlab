@@ -15,14 +15,15 @@ static log_os_t log_output_stream_ops(int ops, log_os_t* val);
 static const char * log_level_to_string(LogLevel level)
 {
     const static char * log_level_str[] = {
-        "OFF",
+        "",
         "DEBUG",
         "INFO",
         "WARN",
         "ERROR",
         "DIE",
+        "OFF",
     };
-    if(level > LOG_DIE || level < LOG_OFF)
+    if(level > LOG_LEVEL_OFF || level < LOG_LEVEL_DEBUG)
     {
         return "INVALID_LEVEL";
     }
@@ -36,7 +37,7 @@ enum {
 
 static LogLevel log_level_ops(int ops, LogLevel *val)
 {
-    static LogLevel level = LOG_DEBUG;
+    static LogLevel level = LOG_LEVEL_DEBUG;
 
     if(val == NULL)
         return level;
@@ -129,7 +130,7 @@ const char * log_get_time()
     return buf;
 }
 
-void log_mesg(LogLevel level, const char * file, const char *func, int line, const char * fmt, ...)
+void log_level_mesg(LogLevel level, const char * file, const char *func, int line, const char * fmt, ...)
 {
     log_os_t os = get_log_os();
     if(os == NULL)
@@ -150,12 +151,30 @@ void log_mesg(LogLevel level, const char * file, const char *func, int line, con
     fflush(os);
 }
 
-void log_perror(LogLevel level, const char * file, const char * func, int line, const char * fmt, ...)
+void log_perror_impl(LogLevel level, const char * file, const char * func, int line, const char * fmt, ...)
 {
-    
+    log_os_t os = get_log_os();
+    if(os == NULL)
+    {
+        fprintf(stderr, "Invalid output stream");
+        return;
+    }
+    if(level < get_log_level())
+        return;
+    int errno_save = errno;
+    va_list args;
+    va_start(args, fmt);
+    // print prefix: [LEVEL] [yyyy-mm-dd hh:mm:ss] func:line - 
+    fprintf(os, "[%5s] [%19s] [%s:%d] - ", log_level_to_string(level), log_get_time(), func, line);
+    // print message
+    vfprintf(os, fmt, args);
+    va_end(args);
+    // print errorno meesage
+    fprintf(os, ": %s\n", strerror(errno_save));
+    fflush(os);
 }
 
-void log_hexdump(int level, const char * file, const char *func, int line, const char *title, const uint8_t *begin, size_t s)
+void log_level_hexdump(int level, const char * file, const char *func, int line, const char *title, const uint8_t *begin, size_t s)
 {
     log_os_t os = get_log_os();
     if(os == NULL)

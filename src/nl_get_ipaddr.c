@@ -79,7 +79,7 @@ const char * rta_type_str(uint16_t type)
 
 void init_simple_log()
 {
-    set_log_level(LOG_INFO);
+    set_log_level(LOG_LEVEL_INFO);
     set_log_os_file("/tmp/nl_get_ipaddr.log");
 }
 

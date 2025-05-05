@@ -13,6 +13,9 @@ socket编程相关
     5. [nl_get_ipaddr.c](src/nl_get_ipaddr.c) 修正 `netlink socket` 创建和绑定逻辑
     6. `netpackets` 中添加 [ip4.h](lib/netpackets/ip4.h), 定义 `ipv4` 包结构体
     7. 添加 [send_ip4.c](src/send_ip4.c) 发送一个 `ipv4` 包
+    8. 重新定义 LogLevel 枚举，调整 OFF 的值
+    9. 新增 `log_perror` 用于打印 `errno` 信息
+    10. log 输出函数添加 `log_level` 前缀
 
 * 2025-05-02
     1. 添加 `simple_log`

@@ -24,12 +24,12 @@ extern "C" {
 #endif
 
 typedef enum {
-    LOG_OFF = 0,
-    LOG_DEBUG = 1,
-    LOG_INFO,
-    LOG_WARN,
-    LOG_ERROR,
-    LOG_DIE,
+    LOG_LEVEL_DEBUG = 1,
+    LOG_LEVEL_INFO,
+    LOG_LEVEL_WARN,
+    LOG_LEVEL_ERROR,
+    LOG_LEVEL_DIE,
+    LOG_LEVEL_OFF = 255,
 } LogLevel;
 
 #define LOG_OS_STDOUT stdout
@@ -46,29 +46,33 @@ int set_log_os_file(const char *file);
 
 // const char * log_get_time();
 
-void log_mesg(LogLevel level, const char *file, const char *func, int line, const char * fmt, ...);
-void log_hexdump(int level, const char * file, const char *func, int line, const char *title, const uint8_t *begin, size_t s);
+void log_level_mesg(LogLevel level, const char *file, const char *func, int line, const char * fmt, ...);
+void log_level_hexdump(int level, const char * file, const char *func, int line, const char *title, const uint8_t *begin, size_t s);
+void log_perror_impl(LogLevel level, const char * file, const char * func, int line, const char * fmt, ...);
 
-#define LOG_DEBUG(fmt, ...) log_mesg(LOG_DEBUG, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
-#define log_debug LOG_DEBUG
+#define LOG_DEBUG(fmt, ...) log_level_mesg(LOG_LEVEL_DEBUG, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+#define log_debug(fmt, ...) LOG_DEBUG(fmt, ##__VA_ARGS__)
 
-#define LOG_INFO(fmt, ...) log_mesg(LOG_INFO, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
-#define log_info LOG_INFO
+#define LOG_INFO(fmt, ...) log_level_mesg(LOG_LEVEL_INFO, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+#define log_info(fmt, ...) LOG_INFO(fmt, ##__VA_ARGS__)
 
-#define LOG_WARN(fmt, ...) log_mesg(LOG_WARN, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
-#define log_warn LOG_WARN
+#define LOG_WARN(fmt, ...) log_level_mesg(LOG_LEVEL_WARN, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+#define log_warn(fmt, ...) LOG_WARN(fmt, ##__VA_ARGS__)
 
-#define LOG_ERROR(fmt, ...) log_mesg(LOG_ERROR, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
-#define log_error LOG_ERROR
+#define LOG_ERROR(fmt, ...) log_level_mesg(LOG_LEVEL_ERROR, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+#define log_error(fmt, ...) LOG_ERROR(fmt, ##__VA_ARGS__)
 
 #define DIE(fmt, ...) do { \
-    log_mesg(LOG_DIE, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__); \
+    log_level_mesg(LOG_LEVEL_DIE, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__); \
     exit(1); \
 } while(0)
-#define log_die DIE
+#define log_die(fmt, ...) DIE(fmt, ##__VA_ARGS__)
 
-#define LOG_LEVEL_HEXDUMP(level, title, begin, s) log_hexdump(level, __FILE__, __FUNCTION__, __LINE__, title, begin, s)
-#define log_debug_hexdump(title, begin, s) LOG_LEVEL_HEXDUMP(LOG_DEBUG, title, begin, s)
+#define LOG_HEXDUMP(level, title, begin, s) log_level_hexdump(level, __FILE__, __FUNCTION__, __LINE__, title, begin, s)
+#define log_hexdump(level, title, begin, s) LOG_HEXDUMP(level, title, begin, s)
+#define log_debug_hexdump(title, begin, s) LOG_HEXDUMP(LOG_LEVEL_DEBUG, title, begin, s)
+
+#define log_perror(fmt, ...) log_perror_impl(LOG_LEVEL_ERROR, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 
 #ifdef __cplusplus
 }
