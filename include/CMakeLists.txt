@@ -1,6 +1,6 @@
-add_library(netlib SHARED common.c util.c arp.c ether.c)
+add_library(socklib SHARED common.c util.c )
 if(WIN32)
-    target_link_libraries(netlib PRIVATE wsock32 ws2_32)
+    target_link_libraries(socklib PRIVATE wsock32 ws2_32)
 endif()
 
 add_library(minish SHARED minish.c)

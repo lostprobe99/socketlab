@@ -34,7 +34,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmacro-prefix-map=${CMAKE_SOURCE_DIR}=")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmacro-prefix-map=${CMAKE_SOURCE_DIR}=")
 
-set(INCLUDE ./include ./lib/simplesocket/include ./lib/simple_log)
+set(INCLUDE ./include ./lib/simplesocket/include ./lib/simple_log ./lib/netpackets/include)
 
 include_directories(${INCLUDE})
 

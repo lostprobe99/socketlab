@@ -12,7 +12,8 @@
 #include <sys/types.h>
 
 #include "debug.h"
-#include "ether.h"
+#include "util.h"
+#include "netpackets/ether.h"
 
 int main(int argc, char ** argv)
 {

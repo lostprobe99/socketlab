@@ -5,6 +5,11 @@
 socket编程相关
 
 ## changelog:
+* 2025-05-05
+    1. 添加 `netpackets` 库
+    2. 拆分 `include` 下的 `arp`, `ether` 到 `lib/netpackets`
+    3. 其他连带调整，保证编译通过
+
 * 2025-05-02
     1. 添加 `simple_log`
     2. 添加 `netlink` 获取 `IP` 地址的示例

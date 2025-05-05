@@ -11,8 +11,7 @@
 
 int main(int argc, char ** argv)
 {
-    printf("%s\n", log_get_time());
-    log_mesg(0, __FILE__, __LINE__, "hello %s\n", "world");
+    log_mesg(0, __FILE__, __FUNCTION__, __LINE__, "hello %s\n", "world");
     LOG_DEBUG("hello %s\n", "world");
     LOG_INFO("hello %s\n", "world");
     LOG_WARN("hello %s\n", "world");

@@ -5,9 +5,9 @@
  * @date   : 2025/01/04 13:28
  * @brief  : arp.c
  */
-#include <unistd.h>
-#include "util.h"
-#include "arp.h"
+// #include <unistd.h>
+#include "netpackets/arp.h"
+#include "netpackets/helper.h"
 
 void pack_arp_msg(arp_msg_t *arp_msg, uint8_t *sender_mac, uint8_t *sender_ip, uint8_t *target_ip)
 {
@@ -25,9 +25,9 @@ void pack_arp_msg(arp_msg_t *arp_msg, uint8_t *sender_mac, uint8_t *sender_ip, u
     // ARP包的协议类型: IPv4
     arp_msg->protocol_type = htons(ETH_P_IP);
     // ARP包的长度: 6
-    arp_msg->hardware_size = ETH_ALEN;
+    arp_msg->hardware_size = MAC_BYTE_LEN;
     // ARP IP地址的长度: 4
-    arp_msg->protocol_size = IPV4_LEN;
+    arp_msg->protocol_size = IPV4_BYTE_LEN;
     // ARP类型: request
     arp_msg->opcode = htons(ARPOP_REQUEST);
     // ARP 请求源 MAC
@@ -49,7 +49,7 @@ int send_arp_pack(int sock_fd, const char *itf, arp_msg_t *arp_msg)
 {
     int ifindex = 0;
     struct sockaddr_ll sock_addr;
-    struct sockaddr_ll src_hwaddr;
+    uint8_t src_hwaddr[MAC_BYTE_LEN] = {0};
 
     ifindex = if_nametoindex(itf);
     if (ifindex == 0) {
@@ -58,8 +58,7 @@ int send_arp_pack(int sock_fd, const char *itf, arp_msg_t *arp_msg)
     }
 
     // 获取网卡 MAC
-    get_itf_mac(itf, &src_hwaddr);
-    if (src_hwaddr.sll_halen == 0) {
+    if (get_itf_hwaddr(itf, (uint8_t *)&src_hwaddr) != 0) {
         perror("get_itf_mac()");
         return -2;
     }
@@ -71,7 +70,7 @@ int send_arp_pack(int sock_fd, const char *itf, arp_msg_t *arp_msg)
     sock_addr.sll_hatype = htons(ARPHRD_ETHER);
     sock_addr.sll_halen = ETH_ALEN;
     // sockaddr MAC 为本机 MAC
-    memcpy(sock_addr.sll_addr, src_hwaddr.sll_addr, sizeof(sock_addr.sll_addr));
+    memcpy(sock_addr.sll_addr, src_hwaddr, sizeof(sock_addr.sll_addr));
 
     // 发送 ARP
     if (sendto(sock_fd, arp_msg, sizeof(arp_msg_t), 0, (struct sockaddr*)&sock_addr, sizeof(sock_addr)) == -1) {
@@ -87,8 +86,8 @@ int arping(int sock, const char *itf, char * target_ip)
     int ifindex = 0;
     arp_msg_t arp = {0};
     struct sockaddr_ll sock_addr;
-    struct sockaddr_ll src_hwaddr;
-    struct sockaddr_in src_ip4;
+    uint8_t src_hwaddr[MAC_BYTE_LEN];
+    uint32_t src_ip4;
     uint8_t to_ip[4] = {0};
 
     inet_pton(AF_INET, target_ip, to_ip);
@@ -97,14 +96,14 @@ int arping(int sock, const char *itf, char * target_ip)
     // printf("网卡索引: %d\n", ifindex);
 
     // 获取网卡 MAC
-    get_itf_mac(itf, &src_hwaddr);
+    get_itf_hwaddr(itf, (uint8_t *)&src_hwaddr);
     // printf("网卡MAC: %02X:%02X:%02X:%02X:%02X:%02X\n", ALL_MAC_BYTE((uint8_t)src_hwaddr.sll_addr));
 
     // 获取网卡 IP
-    get_itf_ip4(itf, &src_ip4);
+    get_itf_ipaddr(itf, &src_ip4);
     // printf("网卡 IP: %s\n", inet_ntoa(src_ip4.sin_addr));
 
-    pack_arp_msg(&arp, src_hwaddr.sll_addr, (uint8_t *)&src_ip4.sin_addr.s_addr, to_ip);
+    pack_arp_msg(&arp, src_hwaddr, (uint8_t *)&src_ip4, to_ip);
 
     // 填充 sockaddr_ll
     sock_addr.sll_family = AF_PACKET;
@@ -113,7 +112,7 @@ int arping(int sock, const char *itf, char * target_ip)
     sock_addr.sll_hatype = htons(ARPHRD_ETHER);
     sock_addr.sll_halen = ETH_ALEN;
     // sockaddr MAC 为本机 MAC
-    memcpy(sock_addr.sll_addr, src_hwaddr.sll_addr, sizeof(sock_addr.sll_addr));
+    memcpy(sock_addr.sll_addr, src_hwaddr, sizeof(sock_addr.sll_addr));
 
     // printf("发送到: %02X:%02X:%02X:%02X:%02X:%02X\n", ALL_MAC_BYTE(sock_addr.sll_addr));
     // hexdump((uint8_t*)&arp, sizeof(arp));
