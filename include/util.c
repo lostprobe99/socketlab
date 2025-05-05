@@ -70,7 +70,7 @@ int os_exec(char *cmd, ...)
     pid = fork();
     if (pid == 0)
     {
-        if (execvp(args[0], &args[1]) == -1)
+        if (execvp(args[0], &args[0]) == -1)
             _exit(127);
     }
     else if (pid > 0)

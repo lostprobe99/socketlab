@@ -9,6 +9,7 @@ socket编程相关
     1. 添加 `netpackets` 库
     2. 拆分 `include` 下的 `arp`, `ether` 到 `lib/netpackets`
     3. 其他连带调整，保证编译通过
+    4. 修复 `os_exec` 中函数 `execvp` 参数错误
 
 * 2025-05-02
     1. 添加 `simple_log`
