@@ -11,6 +11,8 @@ socket编程相关
     3. 其他连带调整，保证编译通过
     4. 修复 `os_exec` 中函数 `execvp` 参数错误
     5. [nl_get_ipaddr.c](src/nl_get_ipaddr.c) 修正 `netlink socket` 创建和绑定逻辑
+    6. `netpackets` 中添加 [ip4.h](lib/netpackets/ip4.h), 定义 `ipv4` 包结构体
+    7. 添加 [send_ip4.c](src/send_ip4.c) 发送一个 `ipv4` 包
 
 * 2025-05-02
     1. 添加 `simple_log`
