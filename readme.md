@@ -10,6 +10,7 @@ socket编程相关
     2. 拆分 `include` 下的 `arp`, `ether` 到 `lib/netpackets`
     3. 其他连带调整，保证编译通过
     4. 修复 `os_exec` 中函数 `execvp` 参数错误
+    5. [nl_get_ipaddr.c](src/nl_get_ipaddr.c) 修正 `netlink socket` 创建和绑定逻辑
 
 * 2025-05-02
     1. 添加 `simple_log`

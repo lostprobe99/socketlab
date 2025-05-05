@@ -95,31 +95,33 @@ int main(int argc, char ** argv)
     }
     log_info("create netlink socket: [%d]\n", sock);
 
-    // struct sockaddr_nl nladdr;
-    // memset(&nladdr, 0, sizeof(nladdr));
-    // nladdr.nl_family = AF_NETLINK;
-    // nladdr.nl_pid = getpid();
-    // nladdr.nl_groups = 0;
-    // nladdr.nl_pad = 0;
-    // dump_sockaddr_nl(nladdr);
+    struct sockaddr_nl nladdr;
+    memset(&nladdr, 0, sizeof(nladdr));
+    nladdr.nl_family = AF_NETLINK;
+    nladdr.nl_pid = getpid();
+    nladdr.nl_groups = 0;
+    nladdr.nl_pad = 0;
+    dump_sockaddr_nl(nladdr);
 
-    // if (bind(sock, (const struct sockaddr *)&nladdr, sizeof(nladdr)) < 0)
-    // {
-    //     perror("bind");
-    //     close(sock);
-    //     exit(EXIT_FAILURE);
-    // }
+    if (bind(sock, (const struct sockaddr *)&nladdr, sizeof(nladdr)) < 0)
+    {
+        perror("bind");
+        close(sock);
+        exit(EXIT_FAILURE);
+    }
+
+    nladdr.nl_pid = 0;  // 0 表示接收方为 kernel
 
     struct {
         struct nlmsghdr nlh;    // netlink 消息头
         struct ifaddrmsg ifa;   // 接口地址信息
     } req;
     memset(&req, 0, sizeof(req));
-    req.nlh.nlmsg_len = NLMSG_LENGTH(sizeof(req));  // 设置消息长度
+    req.nlh.nlmsg_len = NLMSG_LENGTH(sizeof(req.ifa));  // NLMSG_LENGTH 会 + nlmsghdr 的大小
     req.nlh.nlmsg_type = RTM_GETADDR;   // 消息类型为 RTM_GETADDR，获取地址信息
     req.nlh.nlmsg_flags = NLM_F_DUMP | NLM_F_REQUEST;   // 标志位
     req.nlh.nlmsg_seq = 0;
-    req.nlh.nlmsg_pid = getpid();
+    req.nlh.nlmsg_pid = getpid();   // 发送方进程ID
     dump_nlmsghdr(req.nlh);
 
     req.ifa.ifa_family = AF_UNSPEC; // 地址族为 AF_UNSPEC，表示所有地址族
@@ -128,7 +130,7 @@ int main(int argc, char ** argv)
 
     log_info("send netlink message\n");
     // __addr = NULL 表示发送给内核
-    if(sendto(sock, &req, req.nlh.nlmsg_len, 0, NULL, 0) < 0)
+    if(sendto(sock, &req, req.nlh.nlmsg_len, 0, (const struct sockaddr*)&nladdr, sizeof(nladdr)) < 0)
     {
         perror("send");
         close(sock);
@@ -143,10 +145,10 @@ int main(int argc, char ** argv)
     // | ...       |
     // | rtattr    |
     // +-----------+
-    // | nlmsghdr  |
-    // | ifaddrmsg |
-    // | rtattr    |
-    // | ...       |
+    // | nlmsghdr  |<-- NLMSG_NEXT(nlh)
+    // | ifaddrmsg |<-- NLMSG_DATA(nlh)
+    // | rtattr    |<-- IFA_RTA(ifa)
+    // | ...       |<-- RTA_NEXT(rta)
     // | rtattr    |
     // +-----------+
     // 构造 msghdr 用于接收数据
@@ -157,8 +159,13 @@ int main(int argc, char ** argv)
         .iov_len = sizeof(buf)
     };
     struct msghdr msg = {
+        .msg_name = NULL,   /* 可选 */
+        .msg_namelen = 0,   /* 可选 */
         .msg_iov = &iov,
         .msg_iovlen = 1,
+        .msg_control = NULL,    /* 可选 */
+        .msg_controllen = 0,    /* 可选 */
+        .msg_flags = 0,     /* 可选 */
     };
 
     ssize_t n = 0;
@@ -177,6 +184,13 @@ try_recv:
 
     // 提取 nlmsghdr
     nh = (struct nlmsghdr *)buf;
+    /* nlmsg_type 的取值
+    NLMSG_NOOP：不执行任何动作，必须将该消息丢弃；
+    NLMSG_ERROR：消息发生错误；
+    NLMSG_DONE：标识分组消息的末尾；
+    NLMSG_OVERRUN：缓冲区溢出，表示某些消息已经丢失。
+    NLMSG_MIN_TYPEK：预留
+    */
     while(nh->nlmsg_type != NLMSG_DONE)
     {
         for (; NLMSG_OK(nh, n); nh = NLMSG_NEXT(nh, n)) {
@@ -190,22 +204,25 @@ try_recv:
                 break;
             }
 
-            // 提取 ifaddrmsg
-            ifa = NLMSG_DATA(nh);
-            dump_ifaddrmsg(*ifa);
+            if(nh->nlmsg_type == RTM_NEWADDR)
+            {
+                // 提取 ifaddrmsg
+                ifa = NLMSG_DATA(nh);
+                dump_ifaddrmsg(*ifa);
 
-            // 解析 rtattr
-            struct rtattr *rta = IFA_RTA(ifa);
-            int len = IFA_PAYLOAD(nh);
+                // 解析 rtattr
+                struct rtattr *rta = IFA_RTA(ifa);
+                int len = IFA_PAYLOAD(nh);
 
-            while (RTA_OK(rta, len)) {
-                dump_rtattr(*rta);
-                if(rta->rta_type == IFA_ADDRESS || rta->rta_type == IFA_BROADCAST)
-                {
-                    log_info("dev name: %s\n", if_indextoname(ifa->ifa_index, str));
-                    log_info("%s: %s\n", rta_type_str(rta->rta_type), inet_ntop(ifa->ifa_family, RTA_DATA(rta), str, sizeof(str)));
+                while (RTA_OK(rta, len)) {
+                    dump_rtattr(*rta);
+                    if(rta->rta_type == IFA_ADDRESS || rta->rta_type == IFA_BROADCAST)
+                    {
+                        log_info("dev name: %s\n", if_indextoname(ifa->ifa_index, str));
+                        log_info("%s: %s\n", rta_type_str(rta->rta_type), inet_ntop(ifa->ifa_family, RTA_DATA(rta), str, sizeof(str)));
+                    }
+                    rta = RTA_NEXT(rta, len);
                 }
-                rta = RTA_NEXT(rta, len);
             }
         }
         goto try_recv;
