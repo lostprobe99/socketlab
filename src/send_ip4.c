@@ -60,7 +60,7 @@ int send_frame(const char *itf, uint8_t *frame, uint16_t len)
     int sock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
     if(sock < 0)
     {
-        log_error("create socket failed\n");
+        log_fperror("create socket failed");
         return -1;
     }
     if(bind_itf(sock, itf) < 0)

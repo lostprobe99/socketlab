@@ -72,6 +72,8 @@ void log_level_perror(LogLevel level, const char * file, const char * func, int 
 #define log_debug_hexdump(title, begin, s) log_hexdump(LOG_LEVEL_DEBUG, title, begin, s)
 
 #define log_perror(level, fmt, ...) log_level_perror(level, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+#define log_eperror(fmt, ...) log_perror(LOG_LEVEL_ERROR, fmt, ##__VA_ARGS__)
+#define log_fperror(fmt, ...) log_perror(LOG_LEVEL_FATAL, fmt, ##__VA_ARGS__)
 
 #ifdef __cplusplus
 }

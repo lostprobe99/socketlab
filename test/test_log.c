@@ -78,8 +78,8 @@ int main(int argc, char ** argv)
     set_log_level(LOG_LEVEL_FATAL);
     int sock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
     if (sock < 0) {
-        log_perror(LOG_LEVEL_FATAL, "socket()");
-        log_perror(LOG_LEVEL_ERROR, "socket()");
+        log_fperror("socket()");
+        log_eperror("socket()");
     }
 
     log_die("hello %s\n", "world"); // exit 1
