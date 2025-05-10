@@ -5,6 +5,10 @@
 socket编程相关
 
 ## changelog:
+* 2025-05-10
+    1. 重构 `simple_log`, 重新划分日志级别
+    2. 添加一个随机数生成工具 [test/random_gen.py](test/random_gen.py)
+
 * 2025-05-05
     1. 添加 `netpackets` 库
     2. 拆分 `include` 下的 `arp`, `ether` 到 `lib/netpackets`

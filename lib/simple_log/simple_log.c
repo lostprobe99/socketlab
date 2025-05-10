@@ -11,19 +11,19 @@
 static const char * log_level_to_string(LogLevel level);
 static LogLevel log_level_ops(int ops, LogLevel *val);
 static log_os_t log_output_stream_ops(int ops, log_os_t* val);
+static const char * log_get_time();
 
 static const char * log_level_to_string(LogLevel level)
 {
     const static char * log_level_str[] = {
         "",
-        "DEBUG",
-        "INFO",
-        "WARN",
+        "FATAL",
         "ERROR",
-        "DIE",
-        "OFF",
+        "WARN",
+        "INFO",
+        "DEBUG",
     };
-    if(level > LOG_LEVEL_OFF || level < LOG_LEVEL_DEBUG)
+    if(level < LOG_LEVEL_OFF || level > LOG_LEVEL_DEBUG) // 更新越界判断
     {
         return "INVALID_LEVEL";
     }
@@ -37,7 +37,7 @@ enum {
 
 static LogLevel log_level_ops(int ops, LogLevel *val)
 {
-    static LogLevel level = LOG_LEVEL_DEBUG;
+    static LogLevel level = LOG_LEVEL_DEFAULT;
 
     if(val == NULL)
         return level;
@@ -72,7 +72,7 @@ static log_os_t log_output_stream_ops(int ops, log_os_t* val)
     static log_os_t os = NULL;
 
     if(os == NULL)
-        os = stdout;
+        os = LOG_OS_DEFAULT;
 
     if(val == NULL)
         return os;
@@ -111,7 +111,7 @@ int set_log_os_file(const char *file)
     return 0;
 }
 
-const char * log_get_time()
+static const char * log_get_time()
 {
     time_t t;
     struct tm *tmp;
@@ -130,69 +130,71 @@ const char * log_get_time()
     return buf;
 }
 
-void log_level_mesg(LogLevel level, const char * file, const char *func, int line, const char * fmt, ...)
+// TODO: log_printf(...)
+int log_level_vprintf(LogLevel level, const char * fmt, va_list args)
 {
-    log_os_t os = get_log_os();
-    if(os == NULL)
+    int n = 0;
+    log_os_t os = NULL;
+
+    if(level > get_log_level())
+        return -1;
+
+    if((os = get_log_os()) == NULL)
     {
         fprintf(stderr, "Invalid output stream");
-        return;
+        return -1;
     }
-    if(level < get_log_level())
-        return;
-    int errno_save = errno;
-    va_list args;
-    va_start(args, fmt);
-    // print prefix: [LEVEL] [yyyy-mm-dd hh:mm:ss] func:line - 
-    fprintf(os, "[%5s] [%19s] [%s:%d] - ", log_level_to_string(level), log_get_time(), func, line);
-    // print message
-    vfprintf(os, fmt, args);
-    va_end(args);
+    n = vfprintf(os, fmt, args);
     fflush(os);
+    return n;
 }
 
-void log_perror_impl(LogLevel level, const char * file, const char * func, int line, const char * fmt, ...)
+int log_level_printf(LogLevel level, const char * fmt,...)
 {
-    log_os_t os = get_log_os();
-    if(os == NULL)
-    {
-        fprintf(stderr, "Invalid output stream");
-        return;
-    }
-    if(level < get_log_level())
-        return;
+    int n = 0;
+    va_list args;
+    va_start(args, fmt);
+    n = log_level_vprintf(level, fmt, args);
+    va_end(args);
+    return n;
+}
+
+void log_level_mesg(LogLevel level, const char * file, const char *func, int line, const char * fmt, ...)
+{
+    // print prefix: [LEVEL] [yyyy-mm-dd hh:mm:ss] func:line - 
+    log_level_printf(level, "[%5s] [%19s] [%s:%d] - ", log_level_to_string(level), log_get_time(), func, line);
+    va_list args;
+    va_start(args, fmt);
+    // print message
+    log_level_vprintf(level, fmt, args);
+    va_end(args);
+}
+
+void log_level_perror(LogLevel level, const char * file, const char * func, int line, const char * fmt, ...)
+{
     int errno_save = errno;
     va_list args;
     va_start(args, fmt);
     // print prefix: [LEVEL] [yyyy-mm-dd hh:mm:ss] func:line - 
-    fprintf(os, "[%5s] [%19s] [%s:%d] - ", log_level_to_string(level), log_get_time(), func, line);
+    log_level_printf(level, "[%5s] [%19s] [%s:%d] - ", log_level_to_string(level), log_get_time(), func, line);
     // print message
-    vfprintf(os, fmt, args);
+    log_level_vprintf(level, fmt, args);
     va_end(args);
     // print errorno meesage
-    fprintf(os, ": %s\n", strerror(errno_save));
-    fflush(os);
+    log_level_printf(level, ": %s\n", strerror(errno_save));
 }
 
 void log_level_hexdump(int level, const char * file, const char *func, int line, const char *title, const uint8_t *begin, size_t s)
 {
-    log_os_t os = get_log_os();
-    if(os == NULL)
-    {
-        fprintf(stderr, "Invalid output stream");
-        return;
-    }
-    if(level < get_log_level())
-        return;
-    int errno_save = errno;
     // print prefix: [LEVEL] [yyyy-mm-dd hh:mm:ss] func:line title:
-    fprintf(os, "[%5s] [%10s] [%s:%d] %s: ", log_level_to_string(level), log_get_time(), func, line, title == NULL ? "" : title);
+    log_level_printf(level, "[%5s] [%10s] [%s:%d] %s: ", log_level_to_string(level), log_get_time(), func, line, title == NULL ? "" : title);
     for (int i = 0; i < s; i++)
     {
         if (i % 16 == 0)
-            fprintf(os, "\n\t");
-        fprintf(os, "%02x ", begin[i]);
+            log_level_printf(level, "\n\t");
+        else if(i % 8 == 0)
+            log_level_printf(level, "  ");
+        log_level_printf(level, "%02x ", begin[i]);
     }
-    fprintf(os, "\n");
-    fflush(os);
+    log_level_printf(level, "\n");
 }
