@@ -130,7 +130,6 @@ static const char * log_get_time()
     return buf;
 }
 
-// TODO: log_printf(...)
 int log_level_vprintf(LogLevel level, const char * fmt, va_list args)
 {
     int n = 0;
