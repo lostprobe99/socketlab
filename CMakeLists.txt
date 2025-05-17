@@ -41,6 +41,8 @@ include_directories(${INCLUDE})
 # include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 # conan_basic_setup()
 
+# find_package(CUnit REQUIRED)
+
 link_libraries(m)   # 连接 math 库
 
 add_subdirectory(./include)

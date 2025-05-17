@@ -280,3 +280,15 @@ int bind_itf(int sock_fd, const char *itf)
 
     return bind(sock_fd, (struct sockaddr *)&sock_addr, sizeof(sock_addr));
 }
+
+int start_with(const char *str, const char *prefix)
+{
+    return strlen(str) >= strlen(prefix) &&
+           strncmp(str, prefix, strlen(prefix)) == 0;
+}
+
+int end_with(const char *str, const char *suffix)
+{
+    return strlen(str) >= strlen(suffix) &&
+           strcmp(str + strlen(str) - strlen(suffix), suffix) == 0;
+}

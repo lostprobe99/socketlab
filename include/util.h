@@ -73,6 +73,10 @@ int hexdump1(const char * title, uint8_t *begin, int s);
 /// @return 反转后的结果
 uint32_t reverse32(uint32_t x);
 
+int start_with(const char *str, const char *prefix);
+
+int end_with(const char *str, const char *suffix);
+
 #ifdef __cplusplus
 }
 #endif

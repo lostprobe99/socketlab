@@ -5,6 +5,10 @@
 socket编程相关
 
 ## changelog:
+* 2025-5-17
+    1. [util.c](include/util.c) 中添加 `start_with` 和 `end_with` 函数
+    2. 添加对应的基于 `CUnit` 的单元测试 [test_start_with.c](test/test_start_with.c) 和  [test_end_with.c](test/test_end_with.c)
+
 * 2025-05-10
     1. 重构 `simple_log`, 重新划分日志级别
     2. 添加一个随机数生成工具 [test/random_gen.py](test/random_gen.py)
