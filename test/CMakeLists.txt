@@ -15,8 +15,6 @@ foreach(main IN LISTS sources)
     endif()
 endforeach()
 
-add_subdirectory(./argp)
-
 include(CTest)
 add_test(NAME test_start_with COMMAND test_start_with)
 add_test(NAME test_end_with COMMAND test_end_with)
