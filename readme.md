@@ -10,6 +10,7 @@ socket编程相关
     2. 将函数实现移动到 [sock_if.c](lib/netpackets/src/sock_if.c)
     3. 更新其他关联文件的头文件
     4. 添加一个 `argp` 的示例程序, 基于 [一步步了解Argp](https://blog.csdn.net/sinat_38816924/article/details/122180938), 已实现 `第九步`
+    5. 添加 send_ether 的测试脚本 [test_send_ether.sh](test/test_send_ether.sh)
 
 * 2025-5-17
     1. [util.c](include/util.c) 中添加 `start_with` 和 `end_with` 函数

@@ -1,0 +1,3 @@
+00:06:08.596216 5e:bb:f6:9e:ee:fa (oui Unknown) > 00:11:22:33:44:55 (oui Unknown), ethertype IPv4 (0x0800), length 26:  [|ip]
+	0x0000:  0011 2233 4455 5ebb f69e eefa 0800 4865  .."3DU^.......He
+	0x0010:  6c6c 6f2c 2057 6f72 6c64                 llo,.World
