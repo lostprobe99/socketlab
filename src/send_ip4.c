@@ -12,6 +12,7 @@
 #include "netpackets/ether.h"
 #include "netpackets/ip4.h"
 #include "netpackets/helper.h"
+#include "netpackets/sock_if.h"
 #include "simple_log.h"
 
 #define IPV4_DATA_MIN_LEN (ETH_DATA_MIN_LEN - sizeof(ip4_hdr_t))
@@ -78,9 +79,11 @@ int send_frame(const char *itf, uint8_t *frame, uint16_t len)
 
 int main(int argc, char ** argv)
 {
+    set_log_level(LOG_LEVEL_DEBUG);
     const char *itf = "eth0";
     const char * dst_ip_str = "192.168.5.2";
-    uint8_t dst_mac[MAC_BYTE_LEN] = {0x80, 0x2d, 0x1a, 0x1e, 0x55, 0xde};
+    // uint8_t dst_mac[MAC_BYTE_LEN] = {0x80, 0x2d, 0x1a, 0x1e, 0x55, 0xde};
+    uint8_t dst_mac[MAC_BYTE_LEN] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55};
     uint8_t src_mac[MAC_BYTE_LEN] = {0};
     uint32_t src_ip = 0;
     char data[IPV4_DATA_MIN_LEN] = "hello world";

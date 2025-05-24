@@ -5,6 +5,11 @@
 socket编程相关
 
 ## changelog:
+* 2025-5-24
+    1. 重构 `netpackets`, 将 `get_itf_hwaddr`、`get_itf_ipaddr` 和 `bind_itf` 函数从 [helper.h](lib/netpackets/include/netpackets/helper.h) 移动到 [sock_if.h](lib/netpackets/include/netpackets/sock_if.h)
+    2. 将函数实现移动到 [sock_if.c](lib/netpackets/src/sock_if.c)
+    3. 更新其他关联文件的头文件
+
 * 2025-5-17
     1. [util.c](include/util.c) 中添加 `start_with` 和 `end_with` 函数
     2. 添加对应的基于 `CUnit` 的单元测试 [test_start_with.c](test/test_start_with.c) 和  [test_end_with.c](test/test_end_with.c)

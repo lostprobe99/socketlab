@@ -13,6 +13,8 @@
 
 #include "debug.h"
 #include "util.h"
+#include <netpackets/helper.h>
+#include "netpackets/sock_if.h"
 #include "netpackets/ether.h"
 
 int main(int argc, char ** argv)
@@ -27,7 +29,7 @@ int main(int argc, char ** argv)
     int proto = 0;
     uint8_t dest_mac[ETH_ALEN] = {0};
     ether_frame_t frame;
-    struct sockaddr_ll addr;
+    uint8_t addr[MAC_BYTE_LEN] = {0};
     int sock_fd = socket(AF_PACKET, SOCK_RAW, 0);
 
     DIE_IF(sock_fd < 0, "socket");
@@ -39,10 +41,11 @@ int main(int argc, char ** argv)
     INFO("\n\titf: [%s], dest mac: [%s], proto: [%#x]\n\tdata: [%s]\n", itf, mac_ntoa(dest_mac), proto, data);
 
     DIE_IF(bind_itf(sock_fd, itf) < 0, "bind");
-    DIE_IF(get_itf_mac(itf, &addr) < 0, "ioctl");
+    DIE_IF(get_itf_hwaddr(itf, addr) < 0, "ioctl");
     INFO("Send [%s] to [%s]\n", data, s_mac);
-    DIE_IF(send_ether_frame(sock_fd, dest_mac, addr.sll_addr, proto, data, strlen(data)) < 0, "sendto");
+    DIE_IF(send_ether_frame(sock_fd, dest_mac, addr, proto, data, strlen(data)) < 0, "sendto");
 
     close(sock_fd);
+    printf("\r\n");
     return 0;
 }

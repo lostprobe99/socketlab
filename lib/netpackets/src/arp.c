@@ -8,6 +8,7 @@
 // #include <unistd.h>
 #include "netpackets/arp.h"
 #include "netpackets/helper.h"
+#include "netpackets/sock_if.h"
 
 void pack_arp_msg(arp_msg_t *arp_msg, uint8_t *sender_mac, uint8_t *sender_ip, uint8_t *target_ip)
 {

@@ -23,7 +23,8 @@
 #include "common.h"
 #include "debug.h"
 #include "util.h"
-#include "netpackets/arp.h"
+#include <netpackets/arp.h>
+#include <netpackets/helper.h>
 
 #define MAC_FMT "%02X:%02X:%02X:%02X:%02X:%02X"
 #define IP_FMT "%d.%d.%d.%d"
@@ -64,10 +65,10 @@ int main(int argc, char ** argv)
     char *ip_str, *subnet_mask_str, *itf;
     int mask_num = 0;
     arp_msg_t arp_msg = {0};
-    struct sockaddr_in v4 = {0};
-    struct sockaddr_ll mac = {0};
+    uint8_t v4[IPV4_BYTE_LEN] = {0};
+    uint8_t mac[MAC_BYTE_LEN] = {0};
     uint8_t bytes[16] = {0};
-    
+
     if(argc < 3)
     {
         printf("Usage: %s <itf> <ip>/<subnet_mask>\n", "arp_scan");
@@ -79,8 +80,8 @@ int main(int argc, char ** argv)
     subnet_mask_str = strtok(NULL, "/");
     mask_num = atoi(subnet_mask_str);
 
-    get_itf_ip4(itf, &v4);
-    get_itf_mac(itf, &mac);
+    get_itf_ipaddr(itf, (uint32_t *)v4);
+    get_itf_hwaddr(itf, mac);
 
     // 将字符串形式的ip地址转换到字节形式
     struct in_addr ip_addr;
@@ -138,8 +139,8 @@ int main(int argc, char ** argv)
                  * 3. 目标 mac 为本机
                  */
                 if(arp_msg.opcode == htons(ARPOP_REPLY)
-                    && match_ip(arp_msg.target_ip, saddr_to_bytes(&v4, bytes))
-                    && match_mac(arp_msg.target_mac, slladdr_to_bytes(&mac, bytes))
+                    && match_ip(arp_msg.target_ip, v4)
+                    && match_mac(arp_msg.target_mac, mac)
                     && match_ip(arp_msg.sender_ip, (uint8_t*)&target_ip)
                     )
                 {
