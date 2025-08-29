@@ -8,12 +8,12 @@
 
 #include "simple_log.h"
 
-static const char * log_level_to_string(LogLevel level);
-static LogLevel log_level_ops(int ops, LogLevel *val);
+static const char * log_level_to_string(log_level_t level);
+static log_level_t log_level_ops(int ops, log_level_t *val);
 static log_os_t log_output_stream_ops(int ops, log_os_t* val);
 static const char * log_get_time();
 
-static const char * log_level_to_string(LogLevel level)
+static const char * log_level_to_string(log_level_t level)
 {
     const static char * log_level_str[] = {
         "",
@@ -35,9 +35,9 @@ enum {
     LOG_OP_SET,
 } LogLevelOps;
 
-static LogLevel log_level_ops(int ops, LogLevel *val)
+static log_level_t log_level_ops(int ops, log_level_t *val)
 {
-    static LogLevel level = LOG_LEVEL_DEFAULT;
+    static log_level_t level = LOG_LEVEL_DEFAULT;
 
     if(val == NULL)
         return level;
@@ -56,12 +56,12 @@ static LogLevel log_level_ops(int ops, LogLevel *val)
     return level;
 }
 
-LogLevel get_log_level()
+log_level_t get_log_level()
 {
     return log_level_ops(LOG_OP_GET, NULL);
 }
 
-int set_log_level(LogLevel level)
+int set_log_level(log_level_t level)
 {
     log_level_ops(LOG_OP_SET, &level);
     return 0;
@@ -130,11 +130,12 @@ static const char * log_get_time()
     return buf;
 }
 
-int log_level_vprintf(LogLevel level, const char * fmt, va_list args)
+int simple_log_level_vprintf(log_level_t level, const char * fmt, va_list args)
 {
     int n = 0;
     log_os_t os = NULL;
 
+    // 日志等级控制, 大于日志等级则不输出
     if(level > get_log_level())
         return -1;
 
@@ -148,52 +149,38 @@ int log_level_vprintf(LogLevel level, const char * fmt, va_list args)
     return n;
 }
 
-int log_level_printf(LogLevel level, const char * fmt,...)
+int simple_log_level_printf(log_level_t level, const char * fmt,...)
 {
     int n = 0;
     va_list args;
     va_start(args, fmt);
-    n = log_level_vprintf(level, fmt, args);
+    n = simple_log_level_vprintf(level, fmt, args);
     va_end(args);
     return n;
 }
 
-void log_level_mesg(LogLevel level, const char * file, const char *func, int line, const char * fmt, ...)
+void simple_log_level_mesg(log_level_t level, const char * file, const char *func, int line, const char * fmt, ...)
 {
     // print prefix: [LEVEL] [yyyy-mm-dd hh:mm:ss] func:line - 
-    log_level_printf(level, "[%5s] [%19s] [%s:%d] - ", log_level_to_string(level), log_get_time(), func, line);
+    simple_log_level_printf(level, "[%5s] [%19s] [%s:%d] - ", log_level_to_string(level), log_get_time(), func, line);
     va_list args;
     va_start(args, fmt);
     // print message
-    log_level_vprintf(level, fmt, args);
+    simple_log_level_vprintf(level, fmt, args);
     va_end(args);
 }
 
-void log_level_perror(LogLevel level, const char * file, const char * func, int line, const char * fmt, ...)
-{
-    int errno_save = errno;
-    va_list args;
-    va_start(args, fmt);
-    // print prefix: [LEVEL] [yyyy-mm-dd hh:mm:ss] func:line - 
-    log_level_printf(level, "[%5s] [%19s] [%s:%d] - ", log_level_to_string(level), log_get_time(), func, line);
-    // print message
-    log_level_vprintf(level, fmt, args);
-    va_end(args);
-    // print errorno meesage
-    log_level_printf(level, ": %s\n", strerror(errno_save));
-}
-
-void log_level_hexdump(int level, const char * file, const char *func, int line, const char *title, const uint8_t *begin, size_t s)
+void simple_log_level_hexdump(int level, const char * file, const char *func, int line, const char *title, const uint8_t *begin, size_t s)
 {
     // print prefix: [LEVEL] [yyyy-mm-dd hh:mm:ss] func:line title:
-    log_level_printf(level, "[%5s] [%10s] [%s:%d] %s: ", log_level_to_string(level), log_get_time(), func, line, title == NULL ? "" : title);
+    simple_log_level_printf(level, "[%5s] [%10s] [%s:%d] %s: ", log_level_to_string(level), log_get_time(), func, line, title == NULL ? "" : title);
     for (int i = 0; i < s; i++)
     {
         if (i % 16 == 0)
-            log_level_printf(level, "\n\t");
+            simple_log_level_printf(level, "\n\t");
         else if(i % 8 == 0)
-            log_level_printf(level, "  ");
-        log_level_printf(level, "%02x ", begin[i]);
+            simple_log_level_printf(level, "  ");
+        simple_log_level_printf(level, "%02x ", begin[i]);
     }
-    log_level_printf(level, "\n");
+    simple_log_level_printf(level, "\n");
 }

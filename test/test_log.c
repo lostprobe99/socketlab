@@ -12,7 +12,7 @@
 int main(int argc, char ** argv)
 {
     // test log mesg, default level is LOG_LEVEL_INFO
-    log_level_mesg(LOG_LEVEL_DEBUG, __FILE__, __FUNCTION__, __LINE__, "hello %s\n", "world");
+    simple_log_level_mesg(LOG_LEVEL_DEBUG, __FILE__, __FUNCTION__, __LINE__, "hello %s\n", "world");
     log_debug("hello %s\n", "world");
     log_info("hello %s\n", "world");
     log_warn("hello %s\n", "world");
@@ -78,8 +78,8 @@ int main(int argc, char ** argv)
     set_log_level(LOG_LEVEL_FATAL);
     int sock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
     if (sock < 0) {
-        log_fperror("socket()");
-        log_eperror("socket()");
+        // log_fperror("socket()");
+        // log_eperror("socket()");
     }
 
     log_die("hello %s\n", "world"); // exit 1
