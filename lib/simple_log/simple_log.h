@@ -32,6 +32,12 @@ typedef enum {
     LOG_LEVEL_DEBUG,
 } log_level_t;
 
+typedef enum {
+    SLOG_OK = 0,
+    SLOG_ERR_INVALID_ARG = -1,
+    SLOG_ERR_INVALID_SINK = -2,
+} slog_error_code_t;
+
 #define LOG_LEVEL_DEFAULT LOG_LEVEL_INFO
 
 #define LOG_OS_DEFAULT stdout
@@ -42,9 +48,11 @@ typedef FILE* log_os_t;
 log_level_t get_log_level();
 int set_log_level(log_level_t level);
 
-log_os_t get_log_os();
-int set_log_os(log_os_t os);
-int set_log_os_file(const char *file);
+log_os_t simple_log_get_log_os();
+int simple_log_set_log_os(log_os_t os);
+
+int simple_log_set_log_file(const char *file);
+char * simple_log_get_log_file();
 
 int simple_log_level_vprintf(log_level_t level, const char * fmt, va_list args);
 int simple_log_level_printf(log_level_t level, const char * fmt,...);

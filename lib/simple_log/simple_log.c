@@ -7,11 +7,16 @@
  */
 
 #include "simple_log.h"
+#include "internal/simple_log_sink.h"
+#include "internal/simple_log_time.h"
 
 static const char * log_level_to_string(log_level_t level);
 static log_level_t log_level_ops(int ops, log_level_t *val);
-static log_os_t log_output_stream_ops(int ops, log_os_t* val);
-static const char * log_get_time();
+
+enum {
+    LOG_OP_GET = 0,
+    LOG_OP_SET,
+} LogLevelOps;
 
 static const char * log_level_to_string(log_level_t level)
 {
@@ -29,11 +34,6 @@ static const char * log_level_to_string(log_level_t level)
     }
     return log_level_str[level];
 }
-
-enum {
-    LOG_OP_GET = 0,
-    LOG_OP_SET,
-} LogLevelOps;
 
 static log_level_t log_level_ops(int ops, log_level_t *val)
 {
@@ -63,71 +63,56 @@ log_level_t get_log_level()
 
 int set_log_level(log_level_t level)
 {
-    log_level_ops(LOG_OP_SET, &level);
-    return 0;
-}
-
-static log_os_t log_output_stream_ops(int ops, log_os_t* val)
-{
-    static log_os_t os = NULL;
-
-    if(os == NULL)
-        os = LOG_OS_DEFAULT;
-
-    if(val == NULL)
-        return os;
-
-    switch(ops)
+    if(level < LOG_LEVEL_OFF || level > LOG_LEVEL_DEBUG) // 添加越界判断
     {
-        case LOG_OP_GET:
-            *val = os;
-            break;
-        case LOG_OP_SET:
-            os = *val;
-            break;
-        default:
-            break;
+        return SLOG_ERR_INVALID_ARG;
     }
-    return os;
+    log_level_ops(LOG_OP_SET, &level);
+    return SLOG_OK;
 }
 
-log_os_t get_log_os()
+log_os_t simple_log_get_log_os()
 {
-    return log_output_stream_ops(LOG_OP_GET, NULL);
+    return slog_get_sink_fp();
 }
 
-int set_log_os(log_os_t os)
+int simple_log_set_log_os(log_os_t os)
 {
-    log_output_stream_ops(LOG_OP_SET, &os);
-    return 0;
+    slog_set_sink(os, NULL, 0);
+    return SLOG_OK;
 }
 
-int set_log_os_file(const char *file)
+int simple_log_set_log_file(const char *file)
 {
-    FILE* fp = fopen(file, "w");
+    FILE* fp = NULL;
+    int owned = 0;
+
+    if(file == NULL)
+        return SLOG_ERR_INVALID_ARG;
+    if(0 == strcmp(file, "stdout"))
+        fp = stdout;
+    else if(0 == strcmp(file, "stderr"))
+        fp = stderr;
+    else
+    {
+        fp = fopen(file, "w");
+        owned = 1;
+    }
     if (fp == NULL)
-        return -1;
-    set_log_os(fp);
-    return 0;
+        return SLOG_ERR_INVALID_ARG;
+    slog_set_sink(fp, file, owned);
+    return SLOG_OK;
 }
 
-static const char * log_get_time()
+char * simple_log_get_log_file()
 {
-    time_t t;
-    struct tm *tmp;
-    static char buf[64];
-    struct timeval tv;
-    int ms;
+    char * s = slog_get_sink_file();
+    return s;
+}
 
-    t = time(NULL);
-    tmp = localtime(&t);
-    gettimeofday(&tv, NULL);
-    ms = tv.tv_usec / 1000;  // Convert microseconds to milliseconds
-
-    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", tmp);
-    snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), ".%03d", ms);  // Append milliseconds
-
-    return buf;
+int simple_log_cleanup()
+{
+    return SLOG_OK;
 }
 
 int simple_log_level_vprintf(log_level_t level, const char * fmt, va_list args)
@@ -137,12 +122,12 @@ int simple_log_level_vprintf(log_level_t level, const char * fmt, va_list args)
 
     // 日志等级控制, 大于日志等级则不输出
     if(level > get_log_level())
-        return -1;
+        return SLOG_OK;
 
-    if((os = get_log_os()) == NULL)
+    if((os = simple_log_get_log_os()) == NULL)
     {
         fprintf(stderr, "Invalid output stream");
-        return -1;
+        return SLOG_ERR_INVALID_SINK;
     }
     n = vfprintf(os, fmt, args);
     fflush(os);
@@ -162,7 +147,7 @@ int simple_log_level_printf(log_level_t level, const char * fmt,...)
 void simple_log_level_mesg(log_level_t level, const char * file, const char *func, int line, const char * fmt, ...)
 {
     // print prefix: [LEVEL] [yyyy-mm-dd hh:mm:ss] func:line - 
-    simple_log_level_printf(level, "[%5s] [%19s] [%s:%d] - ", log_level_to_string(level), log_get_time(), func, line);
+    simple_log_level_printf(level, "[%5s] [%19s] [%s:%d] - ", log_level_to_string(level), slog_get_time(), func, line);
     va_list args;
     va_start(args, fmt);
     // print message
@@ -173,7 +158,7 @@ void simple_log_level_mesg(log_level_t level, const char * file, const char *fun
 void simple_log_level_hexdump(int level, const char * file, const char *func, int line, const char *title, const uint8_t *begin, size_t s)
 {
     // print prefix: [LEVEL] [yyyy-mm-dd hh:mm:ss] func:line title:
-    simple_log_level_printf(level, "[%5s] [%10s] [%s:%d] %s: ", log_level_to_string(level), log_get_time(), func, line, title == NULL ? "" : title);
+    simple_log_level_printf(level, "[%5s] [%10s] [%s:%d] %s: ", log_level_to_string(level), slog_get_time(), func, line, title == NULL ? "" : title);
     for (int i = 0; i < s; i++)
     {
         if (i % 16 == 0)
