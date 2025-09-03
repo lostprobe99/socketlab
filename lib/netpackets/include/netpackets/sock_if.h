@@ -5,8 +5,8 @@
  * @date   : 2025/05/24 22:15
  * @brief  : sock_if.h
  */
-#ifndef SOCK_IF_H
-#define SOCK_IF_H
+#ifndef NETPACKETS_SOCK_IF_H
+#define NETPACKETS_SOCK_IF_H
 
 #include "common.h"
 

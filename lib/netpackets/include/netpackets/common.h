@@ -43,8 +43,8 @@ extern "C" {
 #define ETH_DATA_MIN_LEN 46
 #define ETH_DATA_MAX_LEN 1500
 
-#define ETH_FRAME_MIN_LEN (sizeof(ether_hdr_t) + ETH_DATA_MIN_LEN)
-#define ETH_FRAME_MAX_LEN (sizeof(ether_hdr_t) + ETH_DATA_MAX_LEN)
+#define ETH_FRAME_MIN_LEN (sizeof(ether_hdr_t) + ETH_DATA_MIN_LEN)  // 60 bytes
+#define ETH_FRAME_MAX_LEN (sizeof(ether_hdr_t) + ETH_DATA_MAX_LEN)  // 1514 bytes
 
 #ifdef __cplusplus
 }
