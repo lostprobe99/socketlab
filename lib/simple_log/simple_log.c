@@ -119,6 +119,11 @@ int simple_log_level_vprintf(log_level_t level, const char * fmt, va_list args)
 {
     int n = 0;
     log_os_t os = NULL;
+    char *m_pos = NULL;
+    int saved_errno = errno;
+    char *fmt_new = fmt;
+    char *err_s = NULL;
+    int need_free = 0, new_len = 0;
 
     // 日志等级控制, 大于日志等级则不输出
     if(level > get_log_level())
@@ -126,10 +131,31 @@ int simple_log_level_vprintf(log_level_t level, const char * fmt, va_list args)
 
     if((os = simple_log_get_log_os()) == NULL)
     {
-        fprintf(stderr, "Invalid output stream");
+        // fprintf(stderr, "Invalid output stream");
         return SLOG_ERR_INVALID_SINK;
     }
-    n = vfprintf(os, fmt, args);
+
+    // 支持 %m 
+    m_pos = strstr(fmt, "%m");
+    // 检查 %%m 
+    if(m_pos != NULL && *(m_pos - 1) != '%')
+    { 
+        // 将 fmt 中的 %m 替换为 strerror
+        err_s = strerror(saved_errno);
+        new_len = strlen(fmt) + strlen(err_s) + 1;
+        need_free = 1;
+        fmt_new = malloc(new_len * sizeof(char));
+        memset(fmt_new, 0, new_len);
+        strncpy(fmt_new, fmt, m_pos - fmt);
+        strcat(fmt_new, err_s);
+        strcat(fmt_new, m_pos + 2);
+    }
+
+    n = vfprintf(os, fmt_new, args);
+    if(need_free)
+    {
+        free(fmt_new);
+    }
     fflush(os);
     return n;
 }
