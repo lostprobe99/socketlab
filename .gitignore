@@ -3,6 +3,7 @@
 build
 *.tmp
 *.log
+log.*
 
 # doxygen 生成的目录
 html
