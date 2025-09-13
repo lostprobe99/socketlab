@@ -7,3 +7,6 @@ build
 # doxygen 生成的目录
 html
 latex
+
+# core 文件
+core.*.*
