@@ -79,8 +79,15 @@ const char * rta_type_str(uint16_t type)
 
 void init_simple_log()
 {
+    FILE *fp = fopen("/tmp/nl_get_ipaddr.log", "w");
     set_log_level(LOG_LEVEL_INFO);
-    simple_log_set_log_file("/tmp/nl_get_ipaddr.log");
+    // simple_log_set_log_file("/tmp/nl_get_ipaddr.log");
+    simple_log_set_log_os(fp);
+}
+
+void cleanup()
+{
+    fclose(simple_log_get_log_os());
 }
 
 int main(int argc, char ** argv)

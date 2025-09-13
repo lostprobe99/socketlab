@@ -51,8 +51,10 @@ int set_log_level(log_level_t level);
 log_os_t simple_log_get_log_os();
 int simple_log_set_log_os(log_os_t os);
 
+#if 0
 int simple_log_set_log_file(const char *file);
 char * simple_log_get_log_file();
+#endif
 
 int simple_log_level_vprintf(log_level_t level, const char * fmt, va_list args);
 int simple_log_level_printf(log_level_t level, const char * fmt,...);
