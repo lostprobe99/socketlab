@@ -25,6 +25,7 @@
 #include "util.h"
 #include <netpackets/arp.h>
 #include <netpackets/helper.h>
+#include "netpackets/sock_if.h"
 
 #define MAC_FMT "%02X:%02X:%02X:%02X:%02X:%02X"
 #define IP_FMT "%d.%d.%d.%d"

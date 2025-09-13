@@ -181,8 +181,9 @@ void simple_log_level_mesg(log_level_t level, const char * file, const char *fun
     va_end(args);
 }
 
-void simple_log_level_hexdump(int level, const char * file, const char *func, int line, const char *title, const uint8_t *begin, size_t s)
+void simple_log_level_hexdump(int level, const char * file, const char *func, int line, const char *title, const void *begin, size_t s)
 {
+    uint8_t *p = (uint8_t *)begin;
     // print prefix: [LEVEL] [yyyy-mm-dd hh:mm:ss] func:line title:
     simple_log_level_printf(level, "[%5s] [%10s] [%s:%d] %s: ", log_level_to_string(level), slog_get_time(), func, line, title == NULL ? "" : title);
     for (int i = 0; i < s; i++)
@@ -191,7 +192,7 @@ void simple_log_level_hexdump(int level, const char * file, const char *func, in
             simple_log_level_printf(level, "\n\t");
         else if(i % 8 == 0)
             simple_log_level_printf(level, "  ");
-        simple_log_level_printf(level, "%02x ", begin[i]);
+        simple_log_level_printf(level, "%02x ", p[i]);
     }
     simple_log_level_printf(level, "\n");
 }

@@ -60,7 +60,7 @@ int simple_log_level_vprintf(log_level_t level, const char * fmt, va_list args);
 int simple_log_level_printf(log_level_t level, const char * fmt,...);
 
 void simple_log_level_mesg(log_level_t level, const char *file, const char *func, int line, const char * fmt, ...);
-void simple_log_level_hexdump(int level, const char * file, const char *func, int line, const char *title, const uint8_t *begin, size_t s);
+void simple_log_level_hexdump(int level, const char * file, const char *func, int line, const char *title, const void *begin, size_t s);
 
 #define slog_mesg(level, fmt, ...) simple_log_level_mesg(level, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 
