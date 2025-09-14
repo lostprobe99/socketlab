@@ -20,13 +20,14 @@
 /* rfc 1071 */ /* 计算校验和前要将校验和字段设置为0 */
 uint16_t ip4_checksum(void* data, uint16_t len)
 {
-    // len 字节数
-    uint16_t *p = (uint16_t *)data;
+    uint8_t *p = (uint8_t *)data;
     uint32_t sum = 0;
     uint16_t result = 0;
     for (; len > 1; len -= 2)   // 每次处理两字节
     {
-        sum += *p++;
+        // 按 16 位分组，低位在左，高位在右
+        sum += (*p << 8) + *(p + 1);
+        p += 2;
     }
     if(len == 1)    // 奇数字节时
         sum += *(uint8_t *)p;   // 处理最后一个字节
