@@ -64,6 +64,10 @@ int os_exec(char *cmd, ...);
 /// @return 
 int round_two(int x);
 
+/// @brief  获取当前时间戳
+/// @return 以毫秒为单位
+uint64_t timestamp();
+
 /// @brief 使用十六进制打印 begin ~ begin + s 之间的数据
 int hexdump(uint8_t *begin, int s);
 
