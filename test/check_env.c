@@ -35,9 +35,12 @@ void test_itf_get()
 void test_byte_seq()
 {
     int32_t f = 0x12345678;
+    //       00 01 02 03
+    // 小端: 78 56 34 12
+    // 大端: 12 34 56 78
     int32_t f1 = 0;
     hexdump((uint8_t*)&f, sizeof(f));
-    if(*(uint8_t*)&f == 1) {
+    if(*(uint8_t*)&f == 0x78) {
         printf("小端\n");
     } else {
         printf("大端\n");
