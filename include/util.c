@@ -104,6 +104,12 @@ uint64_t get_timestamp_us()
     return (uint64_t)ts.tv_sec * 1000000 + (uint64_t)ts.tv_nsec / 1000;
 }
 
+uint64_t u64_min(uint64_t a, uint64_t b)
+{   return a < b ? a : b;   }
+
+uint64_t u64_max(uint64_t a, uint64_t b)
+{   return a > b ? a : b;   }
+
 int hexdump(uint8_t *begin, int s)
 {
     for (int i = 0; i < s; i++)

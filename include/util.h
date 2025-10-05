@@ -68,6 +68,9 @@ uint64_t get_timestamp_ms();
 
 uint64_t get_timestamp_us();
 
+uint64_t u64_min(uint64_t a, uint64_t b);
+uint64_t u64_max(uint64_t a, uint64_t b);
+
 /// @brief 使用十六进制打印 begin ~ begin + s 之间的数据
 int hexdump(uint8_t *begin, int s);
 
