@@ -15,7 +15,7 @@
 #include "netpackets/sock_if.h"
 #include "simple_log.h"
 
-#define IPV4_DATA_MIN_LEN (ETH_DATA_MIN_LEN - sizeof(ip4_hdr_t))
+#define IPV4_DATA_MIN_LEN (ETH_DATA_MIN_LEN - sizeof(ipv4_hdr_t))
 
 /* rfc 1071 */ /* 计算校验和前要将校验和字段设置为0 */
 uint16_t ip4_checksum(void* data, uint16_t len)
@@ -37,7 +37,7 @@ uint16_t ip4_checksum(void* data, uint16_t len)
     return result;
 }
 
-int config_ip4_hdr(ip4_hdr_t *ip, uint16_t hdr_len, uint16_t data_len, uint32_t src_ip, uint32_t dst_ip)
+int config_ip4_hdr(ipv4_hdr_t *ip, uint16_t hdr_len, uint16_t data_len, uint32_t src_ip, uint32_t dst_ip)
 {
     ip->version = 4;
     ip->ihl = hdr_len / 4;
@@ -54,7 +54,7 @@ int config_ip4_hdr(ip4_hdr_t *ip, uint16_t hdr_len, uint16_t data_len, uint32_t 
     ip->checksum = 0;
     ip->src_addr = src_ip;
     ip->dst_addr = dst_ip;
-    ip->checksum = htons(ip4_checksum(ip, sizeof(ip4_hdr_t)));
+    ip->checksum = htons(ip4_checksum(ip, sizeof(ipv4_hdr_t)));
 }
 
 int send_frame(const char *itf, uint8_t *frame, uint16_t len)
@@ -89,10 +89,10 @@ int main(int argc, char ** argv)
     uint32_t src_ip = 0;
     char data[IPV4_DATA_MIN_LEN] = "hello world";
 
-    uint8_t frame[sizeof(ether_hdr_t) + sizeof(ip4_hdr_t) + sizeof(data)] = {0};
+    uint8_t frame[sizeof(ether_hdr_t) + sizeof(ipv4_hdr_t) + sizeof(data)] = {0};
     ether_hdr_t *eth = (ether_hdr_t *)frame;
-    ip4_hdr_t *ip = (ip4_hdr_t *)(frame + sizeof(ether_hdr_t));
-    uint8_t *payload = (uint8_t *)(frame + sizeof(ether_hdr_t) + sizeof(ip4_hdr_t));
+    ipv4_hdr_t *ip = (ipv4_hdr_t *)(frame + sizeof(ether_hdr_t));
+    uint8_t *payload = (uint8_t *)(frame + sizeof(ether_hdr_t) + sizeof(ipv4_hdr_t));
 
     get_itf_ipaddr(itf, &src_ip);
     get_itf_hwaddr(itf, (uint8_t *)&src_mac);
@@ -102,8 +102,8 @@ int main(int argc, char ** argv)
     log_debug_hexdump("eth hdr", (uint8_t *)eth, sizeof(ether_hdr_t));
 
     // 配置 ip 头
-    config_ip4_hdr(ip, sizeof(ip4_hdr_t), sizeof(data), src_ip, inet_addr(dst_ip_str));
-    log_debug_hexdump("ip hdr", (uint8_t *)ip, sizeof(ip4_hdr_t));
+    config_ip4_hdr(ip, sizeof(ipv4_hdr_t), sizeof(data), src_ip, inet_addr(dst_ip_str));
+    log_debug_hexdump("ip hdr", (uint8_t *)ip, sizeof(ipv4_hdr_t));
 
     memcpy(payload, data, sizeof(data));
     log_debug_hexdump("frame", frame, sizeof(frame));

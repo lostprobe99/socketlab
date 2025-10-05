@@ -110,7 +110,10 @@ typedef struct __packed _ip4_hdr_ {
     /* 目的 IP (Destination Address) */
     uint32_t dst_addr;
     /* 可选字段, 选项 */
-} ip4_hdr_t;    // 20 bytes
+} ipv4_hdr_t;    // 20 bytes
+
+void ipv4_ntohs(ipv4_hdr_t *ipv4_hdr);
+void ipv4_htons(ipv4_hdr_t *ipv4_hdr);
 
 #ifdef __cplusplus
 }
