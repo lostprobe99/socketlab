@@ -6,14 +6,12 @@
  * @brief  : util.c
  */
 
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <unistd.h>
 #include <time.h>
-#include <sys/time.h>
 #include <sys/wait.h>
 
 #include "util.h"
@@ -92,11 +90,18 @@ int os_exec(char *cmd, ...)
     return status;
 }
 
-uint64_t timestamp()
+uint64_t get_timestamp_ms()
 {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (uint64_t)tv.tv_sec * 1000 + (uint64_t)tv.tv_usec / 1000;
+    struct timespec ts = {0};
+    clock_gettime(CLOCK_MONOTONIC, &ts);    // CLOCK_MONOTONIC defined in time.h
+    return (uint64_t)ts.tv_sec * 1000 + (uint64_t)ts.tv_nsec / 1000000;
+}
+
+uint64_t get_timestamp_us()
+{
+    struct timespec ts = {0};
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (uint64_t)ts.tv_sec * 1000000 + (uint64_t)ts.tv_nsec / 1000;
 }
 
 int hexdump(uint8_t *begin, int s)

@@ -8,8 +8,6 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 
@@ -66,7 +64,9 @@ int round_two(int x);
 
 /// @brief  获取当前时间戳
 /// @return 以毫秒为单位
-uint64_t timestamp();
+uint64_t get_timestamp_ms();
+
+uint64_t get_timestamp_us();
 
 /// @brief 使用十六进制打印 begin ~ begin + s 之间的数据
 int hexdump(uint8_t *begin, int s);
