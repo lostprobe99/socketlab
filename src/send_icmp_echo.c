@@ -55,18 +55,62 @@ typedef struct recv_packet {
 }recv_data_t;
 
 struct ping_stats {
-    uint64_t sent;
-    uint64_t recv;
-    uint64_t lost;
+    uint64_t start; // timestamp for the program start
+    uint64_t sent;  // tx
+    uint64_t recv;  // rx
+    uint64_t lost;  // loss
     uint64_t min_rtt;
     uint64_t max_rtt;
     uint64_t avg_rtt;
     uint64_t mdev_rtt;
-} stats;
+    uint64_t total_rtt;
+    struct {
+        uint64_t c; // count for rtt
+        uint64_t mean;  // avg
+        uint64_t m2;    // sum of squares of differences from mean
+    } rtt_stats;    // for mdev rtt
+} g_stats = {0};
 
 void usage(char *prog)
 {
     printf("Usage: %s <ip> [count]\n", prog);
+}
+
+// Welford's method
+void update_rtt_stats(uint64_t rtt)
+{
+    // TODO: implement Welford's method
+    g_stats.rtt_stats.c++;
+}
+
+// 统计 rtt (max/min/avg/mdev)
+void rtt_stats(uint64_t rtt, struct ping_stats *pstats)
+{
+    static int rtt_count = 0;
+    rtt_count++;
+    if(pstats->min_rtt == 0)
+        pstats->min_rtt = rtt;
+    pstats->total_rtt += rtt;
+    pstats->min_rtt = u64_min(pstats->min_rtt, rtt);
+    pstats->max_rtt = u64_max(pstats->max_rtt, rtt);
+}
+
+void print_stats(int argc, void *ip)
+{
+    uint64_t diff = get_timestamp_us() - g_stats.start;
+
+    g_stats.avg_rtt = g_stats.total_rtt / g_stats.recv;
+
+    printf("--- %s ping statistics ---\n", (char *)ip);
+    printf("tx=%lu, rx=%lu, loss=%lu (%.1lf%%), ping use time %lu ms\n",
+        g_stats.sent,
+        g_stats.recv,
+        g_stats.lost,
+        1.0 * g_stats.lost / g_stats.sent,
+        diff / 1000u
+    );
+    printf("rtt min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n",
+        g_stats.min_rtt / 1000.0, g_stats.avg_rtt / 1000.0, g_stats.max_rtt / 1000.0, g_stats.mdev_rtt / 1000.0);
 }
 
 // 1071 checksum
@@ -194,7 +238,7 @@ int recv_icmp_echo(int sock, recv_data_t* d)
 
 int ping(const char *ip, int n)
 {
-    uint64_t start = 0, end = 0;
+    uint64_t start = 0, end = 0, rtt = 0;
     recv_data_t recv_data;
     ping_packet_t *icmp = &recv_data.icmp;
     ipv4_hdr_t *ipv4_hdr = &recv_data.ipv4_hdr;
@@ -205,29 +249,38 @@ int ping(const char *ip, int n)
         // 即使 log level 为 off 也可以执行到 die
         log_die("socket() error: %m\n");
     }
-    printf("ping %s\n", ip);
+    printf("PING %s ...\n", ip);
 
     for(int i = 0; i < n; i++)
     {
         start = get_timestamp_us();
         log_info("发送时间：%lu us\n", start);
         send_icmp_echo(sockfd, ip, i + 1);
+        g_stats.sent++;
 
         recv_ret = recv_icmp_echo(sockfd, &recv_data);
         end = recv_data.timestamp;
+        rtt = end - start;
         // 检查接收结果
         if(recv_ret == RECV_SUCCESS)
         {
-            log_info("接收时间：%lu, 用时：%.3lf ms\n", end, (end - start) / 1000.0);
+            g_stats.recv++;
+            log_info("接收时间：%lu, 用时：%.3lf ms\n", end, rtt / 1000.0);
             // 检查 ICMP 响应包
             if(icmp->hdr.type == ICMP_TYPE_ECHO_REPLY && icmp->hdr.code == 0)
             {
-                printf("from %s: seq=%d, ttl=%d, rtt=%.3lf ms\n",
+                rtt_stats(rtt, &g_stats);
+                printf("%d bytes from %s: seq=%d, ttl=%d, rtt=%.3lf ms\n",
+                    MAGIC_LEN,
                     inet_ntoa(recv_data.addr.sin_addr),
-                    ipv4_hdr->ttl,
                     i + 1,
-                    (end - start) / 1000.0
+                    ipv4_hdr->ttl,
+                    rtt / 1000.0
                 );
+            }
+            else
+            {
+                g_stats.lost++;
             }
         }
         else if(recv_ret == RECV_TIMEOUT)
@@ -249,9 +302,11 @@ int ping(const char *ip, int n)
 
 int main(int argc, char ** argv)
 {
+    g_stats.start = get_timestamp_us();
     simple_log_set_log_os(stdout);
     set_log_level(LOG_LEVEL_OFF);
-
+    
+    on_exit(print_stats, argv[1]);
     if(argc < 2)
     {
         usage(argv[0]);
