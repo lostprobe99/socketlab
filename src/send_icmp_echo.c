@@ -48,11 +48,21 @@ typedef struct __packed _ping_packet_ {
 } ping_packet_t;
 
 typedef struct recv_packet {
-    uint64_t time_recv;  // 接收时间
+    uint64_t timestamp;  // 接收时间，单位微秒
     struct sockaddr_in addr; // 发送方地址
-    ip4_hdr_t ip;   // ip报文头
+    ipv4_hdr_t ipv4_hdr;   // ip报文头
     ping_packet_t icmp; // icmp报文
 }recv_data_t;
+
+struct ping_stats {
+    uint64_t sent;
+    uint64_t recv;
+    uint64_t lost;
+    uint64_t min_rtt;
+    uint64_t max_rtt;
+    uint64_t avg_rtt;
+    uint64_t mdev_rtt;
+} stats;
 
 void usage(char *prog)
 {
@@ -104,12 +114,13 @@ int send_icmp_echo(int sock, const char *ip, int seq)
     return n;
 }
 
-int recv_icmp_echo(int sock, ping_packet_t *recv_pack)
+int recv_icmp_echo(int sock, recv_data_t* d)
 {
     uint8_t buf[512];
-    sockaddr from;
-    socklen_t from_len = sizeof(from);
-    // ping_packet_t recv_pack = {0};
+    sockaddr_in *from = &d->addr;
+    socklen_t from_len = sizeof(sockaddr_in);
+    ping_packet_t *recv_icmp = &(d->icmp);
+    ipv4_hdr_t *ipv4_hdr = &(d->ipv4_hdr);
     char s[MAGIC_LEN + 1] = {0};
     int n = 0, ihl = 0;
     struct pollfd pfd = {
@@ -130,7 +141,8 @@ int recv_icmp_echo(int sock, ping_packet_t *recv_pack)
         return RECV_TIMEOUT;
     }
 
-    n = recvfrom(sock, buf, sizeof(buf), 0, &from, &from_len);
+    n = recvfrom(sock, buf, sizeof(buf), 0, (sockaddr*)from, &from_len);
+    d->timestamp = get_timestamp_us();
     // 接收响应包
     if(n < 0)
     {
@@ -152,14 +164,16 @@ int recv_icmp_echo(int sock, ping_packet_t *recv_pack)
         log_error("incomplete ICMP packet\n");
         return RECV_BAD_PACKET;
     }
-    ihl = buf[0] & 0x0f;    // 提取 ihl
+    memcpy(ipv4_hdr, buf, sizeof(ipv4_hdr_t));
+    ipv4_ntohs(ipv4_hdr);
+    ihl = ipv4_hdr->ihl;    // 提取 ihl
     ihl *= 4;   // 计算 ipv4 头长度
-    // buf + ihl skip ipv4 header
-    memcpy(recv_pack, buf + ihl, sizeof(ping_packet_t));
-    recv_pack->echo.identifier = ntohs(recv_pack->echo.identifier);
-    recv_pack->echo.sequence = ntohs(recv_pack->echo.sequence);
-    recv_pack->hdr.checksum = ntohs(recv_pack->hdr.checksum);
-    strncpy(s, recv_pack->data, sizeof(recv_pack->data));
+    // buf + ihl = skip ipv4 header
+    memcpy(recv_icmp, buf + ihl, sizeof(ping_packet_t));
+    recv_icmp->echo.identifier = ntohs(recv_icmp->echo.identifier);
+    recv_icmp->echo.sequence = ntohs(recv_icmp->echo.sequence);
+    recv_icmp->hdr.checksum = ntohs(recv_icmp->hdr.checksum);
+    strncpy(s, recv_icmp->data, sizeof(recv_icmp->data));
     log_debug("接收到的ICMP数据包：\n"
               "\ttype: %d\n"
               "\tcode: %d\n"
@@ -167,21 +181,23 @@ int recv_icmp_echo(int sock, ping_packet_t *recv_pack)
               "\tidentifier: %d\n"
               "\tsequence: %d\n"
               "\tdata: %s\n",
-              recv_pack->hdr.type,
-              recv_pack->hdr.code,
-              recv_pack->hdr.checksum,
-              recv_pack->echo.identifier,
-              recv_pack->echo.sequence,
+              recv_icmp->hdr.type,
+              recv_icmp->hdr.code,
+              recv_icmp->hdr.checksum,
+              recv_icmp->echo.identifier,
+              recv_icmp->echo.sequence,
               s
     );
 
-    return 0;
+    return RECV_SUCCESS;
 }
 
 int ping(const char *ip, int n)
 {
     uint64_t start = 0, end = 0;
-    ping_packet_t recv_pack;
+    recv_data_t recv_data;
+    ping_packet_t *icmp = &recv_data.icmp;
+    ipv4_hdr_t *ipv4_hdr = &recv_data.ipv4_hdr;
     int recv_ret = RECV_SUCCESS;
     int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if( sockfd < 0 )
@@ -193,20 +209,25 @@ int ping(const char *ip, int n)
 
     for(int i = 0; i < n; i++)
     {
-        start = timestamp();
-        log_info("发送时间：%lu\n", start);
+        start = get_timestamp_us();
+        log_info("发送时间：%lu us\n", start);
         send_icmp_echo(sockfd, ip, i + 1);
 
-        recv_ret = recv_icmp_echo(sockfd, &recv_pack);
-        end = timestamp();
+        recv_ret = recv_icmp_echo(sockfd, &recv_data);
+        end = recv_data.timestamp;
         // 检查接收结果
         if(recv_ret == RECV_SUCCESS)
         {
-            log_info("接收时间：%lu, 用时：%lu ms\n", end, end - start);
+            log_info("接收时间：%lu, 用时：%.3lf ms\n", end, (end - start) / 1000.0);
             // 检查 ICMP 响应包
-            if(recv_pack.hdr.type == ICMP_TYPE_ECHO_REPLY && recv_pack.hdr.code == 0)
+            if(icmp->hdr.type == ICMP_TYPE_ECHO_REPLY && icmp->hdr.code == 0)
             {
-                printf("from %s: seq=%d, rtt=%lu ms\n", ip, i + 1, end - start);
+                printf("from %s: seq=%d, ttl=%d, rtt=%.3lf ms\n",
+                    inet_ntoa(recv_data.addr.sin_addr),
+                    ipv4_hdr->ttl,
+                    i + 1,
+                    (end - start) / 1000.0
+                );
             }
         }
         else if(recv_ret == RECV_TIMEOUT)
