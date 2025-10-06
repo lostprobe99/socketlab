@@ -34,9 +34,14 @@
 
 #define ANSI_FMT(str, color) color str ANSI_NONE
 
+#define BLACK(format, ...) ANSI_FMT(format, ANSI_FG_BLACK), ##__VA_ARGS__
 #define RED(format, ...) ANSI_FMT(format, ANSI_FG_RED), ##__VA_ARGS__
 #define GREEN(format, ...) ANSI_FMT(format, ANSI_FG_GREEN), ##__VA_ARGS__
+#define YELLOW(format, ...) ANSI_FMT(format, ANSI_FG_YELLOW), ##__VA_ARGS__
 #define BLUE(format, ...) ANSI_FMT(format, ANSI_FG_BLUE), ##__VA_ARGS__
+#define MAGENTA(format, ...) ANSI_FMT(format, ANSI_FG_MAGENTA), ##__VA_ARGS__
+#define CYAN(format, ...) ANSI_FMT(format, ANSI_FG_CYAN), ##__VA_ARGS__
+#define WHITE(format, ...) ANSI_FMT(format, ANSI_FG_WHITE), ##__VA_ARGS__
 
 #define EXPECT(x1, x2)                                                                  \
     do                                                                                  \
@@ -58,6 +63,10 @@
             assert(cond);                                              \
         }                                                              \
     } while (0)
+
+#define panic(format, ...) Assert(0, format, ##__VA_ARGS__)
+
+#define TODO(s) panic("TODO: %s", s)
 
 #define DIE(format, ...)                                                                                  \
     do                                                                                                           \
