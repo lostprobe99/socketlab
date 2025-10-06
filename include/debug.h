@@ -66,7 +66,7 @@
 
 #define panic(format, ...) Assert(0, format, ##__VA_ARGS__)
 
-#define TODO(s) panic("TODO: %s", s)
+#define TODO(format, ...) panic("TODO(%s, %d): " format, __FUNCTION__, __LINE__, ##__VA_ARGS__)
 
 #define DIE(format, ...)                                                                                  \
     do                                                                                                           \
