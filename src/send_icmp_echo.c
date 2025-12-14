@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <sys/poll.h>
 
 #include "netpackets/sock_if.h"
@@ -16,6 +17,7 @@
 
 #include "simple_log.h"
 
+#include "debug.h"
 #include "common.h"
 #include "util.h"
 
@@ -62,13 +64,23 @@ struct ping_stats {
     uint64_t min_rtt;
     uint64_t max_rtt;
     uint64_t avg_rtt;
-    uint64_t mdev_rtt;
+    /*
+     * 样本标准差
+     * 无论发10 个还是 100 个 ping 包，都只是对网络状态的一次抽样
+     * ping 判断的是“这条路径 RTT 的真实波动”，而不是“这几次 ping 的波动”
+     * Linux 原生 ping 命令输出的 mdev 也是 样本标准差
+    */
+    double mdev_rtt;  // 样本标准差
     uint64_t total_rtt;
     struct {
         uint64_t c; // count for rtt
-        uint64_t mean;  // avg
-        uint64_t m2;    // sum of squares of differences from mean
+        double mean;  // avg
+        double m2;    // sum of squares of differences from mean // 平方偏差和
+        // mdev^2 = m2 / c
     } rtt_stats;    // for mdev rtt
+    #define mean g_stats.rtt_stats.mean
+    #define m2 g_stats.rtt_stats.m2
+    #define c g_stats.rtt_stats.c
 } g_stats = {0};
 
 void usage(char *prog)
@@ -79,11 +91,29 @@ void usage(char *prog)
 // Welford's method
 void update_rtt_stats(uint64_t rtt)
 {
-    // TODO: implement Welford's method
-    g_stats.rtt_stats.c++;
+    // mean_{n+1} = mean_n + (x - mean_n) / (n + 1)
+    // m2_{n+1} = m2_n + (x - mean_n) * (x - mean_{n+1})
+
+    // d1 = x - mean_n, d2 = x - mean_{n+1}
+
+    // mean_{n+1} = mean_n + d / (n + 1)
+    // m2_{n+1} = m2_n + d * (x - mean_{n+1})
+    double d1, d2;  // 后面立即赋值，所以不进行初始化
+    double x = (double)rtt; // 计算中全部使用 double
+
+    // 1. 计算 d1
+    d1 = x - mean;    // 计算 x - mean_n
+    c++;    // 计数 n + 1
+    // 2. 更新平均值 mean
+    mean = mean + (1.0 * d1 / c);  // mean_{n+1}
+
+    // 3. 计算 d2
+    d2 = x - mean;    // 此时 mean = mean_{n+1}
+    // 4. 计算 m2
+    m2 = m2 + d1 * d2;
 }
 
-// 统计 rtt (max/min/avg/mdev)
+// 统计 rtt (max/min/avg/mdev) 其中 rtt 的单位是微秒
 void rtt_stats(uint64_t rtt, struct ping_stats *pstats)
 {
     static int rtt_count = 0;
@@ -93,13 +123,21 @@ void rtt_stats(uint64_t rtt, struct ping_stats *pstats)
     pstats->total_rtt += rtt;
     pstats->min_rtt = u64_min(pstats->min_rtt, rtt);
     pstats->max_rtt = u64_max(pstats->max_rtt, rtt);
+    update_rtt_stats(rtt);
 }
 
 void print_stats(int argc, void *ip)
 {
     uint64_t diff = get_timestamp_us() - g_stats.start;
 
-    g_stats.avg_rtt = g_stats.total_rtt / g_stats.recv;
+    // 若没有发包，则退出
+    if(g_stats.sent == 0)
+        return;
+
+    // g_stats.avg_rtt = g_stats.total_rtt / g_stats.recv;
+    g_stats.avg_rtt = mean;
+
+    g_stats.mdev_rtt = sqrt(m2 / (c - 1));
 
     printf("--- %s ping statistics ---\n", (char *)ip);
     printf("tx=%lu, rx=%lu, loss=%lu (%.1lf%%), ping use time %lu ms\n",
@@ -247,7 +285,8 @@ int ping(const char *ip, int n)
     if( sockfd < 0 )
     {
         // 即使 log level 为 off 也可以执行到 die
-        log_die("socket() error: %m\n");
+        printf("socket() error: %s\n", strerror(errno));
+        exit(1);
     }
     printf("PING %s ...\n", ip);
 
