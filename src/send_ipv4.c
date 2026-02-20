@@ -17,25 +17,7 @@
 
 #define IPV4_DATA_MIN_LEN (ETH_DATA_MIN_LEN - sizeof(ipv4_hdr_t))
 
-/* rfc 1071 */ /* 计算校验和前要将校验和字段设置为0 */
-uint16_t ip4_checksum(void* data, uint16_t len)
-{
-    uint8_t *p = (uint8_t *)data;
-    uint32_t sum = 0;
-    uint16_t result = 0;
-    for (; len > 1; len -= 2)   // 每次处理两字节
-    {
-        // 按 16 位分组，低位在左，高位在右
-        sum += (*p << 8) + *(p + 1);
-        p += 2;
-    }
-    if(len == 1)    // 奇数字节时
-        sum += *(uint8_t *)p;   // 处理最后一个字节
-    sum = (sum >> 16) + (sum & 0xffff); // 将产生的进位加到低16位
-    sum += (sum >> 16); // 将上一行产生的进位再加
-    result = ~sum;
-    return result;
-}
+
 
 int config_ip4_hdr(ipv4_hdr_t *ip, uint16_t hdr_len, uint16_t data_len, uint32_t src_ip, uint32_t dst_ip)
 {
@@ -54,7 +36,7 @@ int config_ip4_hdr(ipv4_hdr_t *ip, uint16_t hdr_len, uint16_t data_len, uint32_t
     ip->checksum = 0;
     ip->src_addr = src_ip;
     ip->dst_addr = dst_ip;
-    ip->checksum = htons(ip4_checksum(ip, sizeof(ipv4_hdr_t)));
+    ip->checksum = htons(ipv4_checksum(ip, sizeof(ipv4_hdr_t)));
 }
 
 int send_frame(const char *itf, uint8_t *frame, uint16_t len)
