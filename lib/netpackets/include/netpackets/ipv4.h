@@ -115,6 +115,7 @@ typedef struct __packed _ip4_hdr_ {
 void ipv4_ntohs(ipv4_hdr_t *ipv4_hdr);
 void ipv4_htons(ipv4_hdr_t *ipv4_hdr);
 uint16_t ipv4_checksum(void* data, uint16_t len);
+void pack_ipv4_hdr(ipv4_hdr_t *ipv4, uint32_t src, uint32_t dst, uint8_t protocol, uint16_t data_len);
 
 #ifdef __cplusplus
 }

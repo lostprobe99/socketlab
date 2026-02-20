@@ -41,3 +41,19 @@ uint16_t ipv4_checksum(void* data, uint16_t len)
     result = ~sum;
     return result;
 }
+
+void pack_ipv4_hdr(ipv4_hdr_t *ipv4, uint32_t src, uint32_t dst, uint8_t protocol, uint16_t data_len)
+{
+    ipv4->version = 4;
+    ipv4->ihl = sizeof(ipv4_hdr_t) / 4;
+    ipv4->tos = 0;
+    ipv4->tot_len = htons(sizeof(ipv4_hdr_t) + data_len);
+    ipv4->id = htons(getpid());
+    ipv4->frag = htons(DF);
+    ipv4->ttl = 64;
+    ipv4->protocol = protocol;
+    ipv4->checksum = 0;
+    ipv4->src_addr = (src);
+    ipv4->dst_addr = (dst);
+    ipv4->checksum = ipv4_checksum(ipv4, sizeof(ipv4_hdr_t));
+}
