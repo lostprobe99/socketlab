@@ -50,7 +50,7 @@ add_subdirectory(./src)
 add_subdirectory(./test)
 add_subdirectory(./lib)
 
-# add_custom_target(clean-all
-#     COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}
-#     COMMENT "remove build dir"
-# )
+add_custom_target(clean-all
+    COMMAND rm -rf ${PROJECT_BINARY_DIR}
+    COMMENT "remove build dir"
+)
