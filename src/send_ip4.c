@@ -98,7 +98,7 @@ int main(int argc, char ** argv)
     get_itf_hwaddr(itf, (uint8_t *)&src_mac);
 
     // 组装 ether 头
-    pack_ether_hdr(eth, dst_mac, src_mac, ETH_TYPE_IP4);
+    pack_ether_hdr(eth, dst_mac, src_mac, ETH_TYPE_IPV4);
     log_debug_hexdump("eth hdr", (uint8_t *)eth, sizeof(ether_hdr_t));
 
     // 配置 ip 头

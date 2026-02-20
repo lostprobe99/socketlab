@@ -15,7 +15,7 @@
 extern "C" {
 #endif 
 
-#define ETH_TYPE_IP4 0x0800
+#define ETH_TYPE_IPV4 0x0800
 
 typedef struct __packed _ip4_hdr_ {
     struct {
