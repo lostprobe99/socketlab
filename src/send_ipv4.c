@@ -39,30 +39,10 @@ int config_ip4_hdr(ipv4_hdr_t *ip, uint16_t hdr_len, uint16_t data_len, uint32_t
     ip->checksum = htons(ipv4_checksum(ip, sizeof(ipv4_hdr_t)));
 }
 
-int send_frame(const char *itf, uint8_t *frame, uint16_t len)
-{
-    int sock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-    if(sock < 0)
-    {
-        log_error("create socket failed");
-        return -1;
-    }
-    if(bind_itf(sock, itf) < 0)
-    {
-        log_error("bind itf failed\n");
-        return -1;
-    }
-    if(sendto(sock, frame, len, 0, NULL, 0) < 0)
-    {
-        log_error("sendto failed\n");
-        return -2;
-    }
-    return 0;
-}
-
 int main(int argc, char ** argv)
 {
     set_log_level(LOG_LEVEL_DEBUG);
+    simple_log_set_log_os(stdout);
     const char *itf = "eth0";
     const char * dst_ip_str = "192.168.5.2";
     // uint8_t dst_mac[MAC_BYTE_LEN] = {0x80, 0x2d, 0x1a, 0x1e, 0x55, 0xde};

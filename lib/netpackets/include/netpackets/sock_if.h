@@ -38,6 +38,10 @@ int get_itf_ipaddr(const char *itf, uint32_t *addr);
 /// @return bind() 函数的返回值
 int bind_itf(int sock_fd, const char *itf);
 
+/// @brief 发送数据帧
+/// @return 小于 0 表示发送失败
+int send_frame(const char *itf, uint8_t *frame, uint16_t len);
+
 #ifdef __cplusplus
 }
 #endif

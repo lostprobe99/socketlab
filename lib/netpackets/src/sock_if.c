@@ -91,3 +91,22 @@ int bind_itf(int sock_fd, const char *itf)
 
     return bind(sock_fd, (struct sockaddr *)&sock_addr, sizeof(sock_addr));
 }
+
+int send_frame(const char *itf, uint8_t *frame, uint16_t len)
+{
+    int sock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+    int ret = 0;
+
+    if(sock < 0)
+        return -1;
+
+    if((ret = bind_itf(sock, itf)) < 0)
+        goto err;
+
+    if((ret = sendto(sock, frame, len, 0, NULL, 0)) < 0)
+        goto err;
+
+err:
+    close(sock);
+    return ret;
+}
