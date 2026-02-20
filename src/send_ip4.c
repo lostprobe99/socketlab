@@ -10,7 +10,7 @@
 #include <string.h>
 
 #include "netpackets/ether.h"
-#include "netpackets/ip4.h"
+#include "netpackets/ipv4.h"
 #include "netpackets/helper.h"
 #include "netpackets/sock_if.h"
 #include "simple_log.h"

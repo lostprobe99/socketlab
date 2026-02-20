@@ -13,7 +13,7 @@
 
 #include "netpackets/sock_if.h"
 #include "netpackets/icmp.h"
-#include "netpackets/ip4.h"
+#include "netpackets/ipv4.h"
 
 #include "simple_log.h"
 

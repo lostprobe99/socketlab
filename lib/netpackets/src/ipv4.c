@@ -6,7 +6,7 @@
  * @brief  : ipv4.c
  */
 
-#include "netpackets/ip4.h"
+#include "netpackets/ipv4.h"
 
 void ipv4_ntohs(ipv4_hdr_t *ipv4_hdr)
 {
