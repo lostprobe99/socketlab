@@ -1,4 +1,4 @@
-name: CI Build and Test
+name: CI Build
 
 on:
   push:
@@ -19,32 +19,14 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y ninja-build libreadline-dev libsqlite3-dev curl
+        sudo apt-get install build-essential cmake ninja-build # 安装编译工具
+        sudo apt-get install -y libreadline-dev libsqlite3-dev curl # 其他库
         
     - name: Configure build
       run: |
+        mkdir build
         cmake -B build -G Ninja
         
     - name: Build project
       run: |
         cmake --build build
-        
-    - name: Check build status
-      run: |
-        if [ -d "build" ]; then
-          echo "✅ Build completed successfully"
-          
-          # List all built targets
-          echo "📋 Built targets:"
-          cmake --build build --target help 2>/dev/null || echo "No help target available"
-          
-          # Check if there are test targets (simplified check)
-          if [ -d "build/test" ]; then
-            echo "🧪 Test targets available:"
-            ls -la build/test/ | grep -E "^(test_)"
-          fi
-        else
-          echo "❌ Build failed - build directory not found"
-          exit 1
-        fi
-      shell: bash
