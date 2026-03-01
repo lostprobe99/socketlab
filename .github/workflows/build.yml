@@ -14,8 +14,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       
-    # Setup CMake will be handled manually in the next step
-        
     - name: Install dependencies
       run: |
         sudo apt-get update
