@@ -20,7 +20,7 @@ jobs:
         # 安装编译工具
         sudo apt-get install build-essential cmake ninja-build
         # 其他库
-        sudo apt-get install -y libreadline-dev libsqlite3-dev curl libcunit1-dev
+        sudo apt-get install -y libreadline-dev libsqlite3-dev curl libcunit1-dev fswatch
         
     - name: Configure build
       run: |
