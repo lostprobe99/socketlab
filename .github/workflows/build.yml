@@ -17,8 +17,10 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install build-essential cmake ninja-build # 安装编译工具
-        sudo apt-get install -y libreadline-dev libsqlite3-dev curl # 其他库
+        # 安装编译工具
+        sudo apt-get install build-essential cmake ninja-build
+        # 其他库
+        sudo apt-get install -y libreadline-dev libsqlite3-dev curl libcunit1-dev
         
     - name: Configure build
       run: |
