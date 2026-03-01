@@ -15,7 +15,7 @@ jobs:
       uses: actions/checkout@v4
       
     - name: Setup CMake
-      uses: jcmelero/setup-cmake@v3
+      uses: cpan100/setup-cmake@v3.1.0
       with:
         cmake-version: '3.16.0'
         
