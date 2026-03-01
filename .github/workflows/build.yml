@@ -14,10 +14,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       
-    - name: Setup CMake
-      uses: jc骚操作/cmake-setup-action@v1
-      with:
-        cmake-version: '3.16.0'
+    # Setup CMake will be handled manually in the next step
         
     - name: Install dependencies
       run: |
