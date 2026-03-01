@@ -39,7 +39,8 @@ int main(int argc, char ** argv)
     while(1)
     {
         printf("Input message(Q to quit): ");
-        fgets(msg, BUF_SIZE, stdin);
+        if(fgets(msg, BUF_SIZE, stdin) == NULL)
+            break;
         str_len = strlen(msg);
         if(str_len - 1 == 0 && msg[0] == '\n')
             continue;
