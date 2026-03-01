@@ -17,7 +17,7 @@ int main(int argc, char ** argv)
 {
     char buf1[] = "msg from write\n";
     char buf2[] = "msg from fprintf\n";
-    int fd = open("tofd.tmp", O_RDWR | O_CREAT);
+    int fd = open("tofd.tmp", O_RDWR | O_CREAT, 0644);
     Assert(fd != -1, "file open failed");
     INFO("fd of file `tofd.tmp` is %d\n", fd);
     write(fd, buf1, sizeof(buf1));
